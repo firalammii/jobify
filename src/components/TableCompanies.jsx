@@ -13,22 +13,21 @@ import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
 import { companiesTableheads } from '../data/table-heads-data';
 
-function TableCompanies ({ tableHeads = companiesTableheads, selectModal }) {
+function TableCompanies ({ selectModal }) {
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
-	const [page, setPage] = React.useState(currPage);
-	const dispatch = useDispatch();
+	// const [page, setPage] = React.useState();
 
+	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
+
+
 
 	const { companies, totalCompanies, currPage, totalPages } = useSelector(state => state.company);
 
 	const handleChangePage = async (event, newPage) => {
 		// dispatch(fetchJobsStart());
-
 		const query = `page=${currPage + 1}&limit=${rowsPerPage}`;
-
 		try {
-
 			const response = await axios.get(`/api/jobs?${query}`);
 
 			console.log("response: ", response);
