@@ -1,0 +1,97 @@
+@use "global";
+
+.AddComp {
+	// border: 2px solid red;
+	width: 100%;
+	height: 100%;
+	padding: 1em 0;
+	// overflow: auto;	
+
+}
+
+form {
+		height: 100%;
+
+		// border: 2px solid blue;
+
+		.inputs-con {
+			width: 100%;
+			height: 100%;
+			padding: 10px 0;
+			display: grid;
+			overflow-x: auto;
+			align-items: center;
+			grid-template-columns: repeat(3, minmax(200px, 1fr));
+			align-items: center;
+			gap: 20px;
+
+			// border: 2px solid blue;
+
+			.label-input-con {
+				padding: 1em;
+				display: grid;
+				background-color: global.$awwssse-white;
+				font-size: 13px;
+				text-transform: uppercase;
+				border-radius: 8px;
+				row-gap: 20px;
+
+
+				// border: 2px solid red;
+
+				.label {
+					text-transform: uppercase;
+					align-self: center;
+					color: global.$table-body;
+				}
+
+				.logo {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+				}
+
+				.input {
+					width: 100%;
+					height: 40px;
+					padding: 0 5px;
+					border-radius: 5px;
+					border: 1px solid global.$hor-line;
+					color: global.$table-body;
+					border-radius: 5px;
+					outline: none;
+					font-weight: 100;
+
+				}
+
+				// .small--input {
+				// 	width: 50%;
+				// }
+
+				.form-btn {
+					background-color: global.$awwssse-blue;
+					color: global.$awwssse-white;
+					font-weight: bold;
+					cursor: pointer;
+					// grid-column: 1/-1;
+					// grid-row: 2/-1;
+
+					// border: 2px solid red;
+
+				}
+
+				.textarea {
+					height: 200px;
+					resize: none;
+					// border: 2px solid red;
+				}
+
+				.error {
+					border: 2px solid red;
+				}
+			}
+
+
+		}
+
+	}

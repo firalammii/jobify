@@ -1,0 +1,23 @@
+@use "global";
+
+.overlay {
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: fixed;
+    background: global.$modal-overlay-bgc;
+    display: grid;
+    place-items: center;
+    z-index: 99;
+
+}
+.offscreen {
+    position: absolute;
+    left: -9999px;
+}
+.hide {
+  display: none;
+}

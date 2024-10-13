@@ -1,0 +1,38 @@
+@use "global";
+
+
+.display-area {
+  grid-column: 3/-1;
+  grid-row: 2/-1;
+  padding: 0 20px;
+  background-color: global.$navbar-bgc;
+  overflow-x: scroll;
+
+  // border: 2px solid rgb(4, 209, 48);
+}
+
+.very-widescreen {
+  grid-column: 1/-1;
+  grid-row: 1/-2;
+  overflow-x: scroll;
+
+  // border: 3px solid rgb(28, 4, 209);
+}
+
+.no-sidebar-display {
+  grid-column: 1/-1;
+  grid-row: 3/-1;
+  padding: 20px;
+  background-color: global.$navbar-bgc;
+  overflow-x: scroll;
+
+  // border: 2px solid rgb(209, 4, 124);
+}
+
+.widescreen-displayer {
+  grid-column: 1/-1;
+  grid-row: 2/-1;
+  overflow-x: scroll;
+
+  // border: 3px solid rgb(28, 4, 209);
+}

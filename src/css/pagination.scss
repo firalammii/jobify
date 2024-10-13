@@ -1,0 +1,73 @@
+@use "global";
+
+.Pagination {
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: global.$thead-bgc;
+    color: global.$awwssse-blue;
+    // position: absolute;
+    // bottom: 20px;
+
+
+    .pages {
+        max-width: 200px;
+        height: 32px;
+        overflow-x: auto;
+        display: flex;
+        align-items: center;
+
+        .page {
+            min-width: 40px;
+            height: 100%;
+            border-radius: 5px;
+            display: grid;
+            place-items: center;
+            border: 1px solid global.$hor-line;
+
+
+            &:hover {
+                color: global.$awwssse-blue;
+                background-color: global.$hover-blue;
+                cursor: pointer;
+            }
+        }
+
+        .hovered {
+            color: global.$awwssse-blue;
+            background-color: global.$hover-blue;
+            cursor: pointer;
+        }
+
+        .icons {
+            padding: 0 20px;
+        }
+
+        .selected {
+            color: global.$awwssse-white;
+            background-color: global.$awwssse-blue;
+            font-weight: 700;
+        }
+    }
+
+    .input {
+        background-color: global.$awwssse-white;
+        border: 1px solid global.$hor-line;
+        padding-left: 5px;
+        border-radius: 3px;
+
+        &:focus {
+            outline: none;
+            border: 2px solid global.$hor-line;
+        }
+    }
+
+    .goto-btn {
+        border: 1px solid global.$hor-line;
+        background-color: global.$awwssse-blue;
+        color: global.$awwssse-white;
+        border-radius: 3px;
+        padding: 0 20px;
+    }
+}

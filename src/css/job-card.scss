@@ -1,0 +1,60 @@
+@use "global";
+
+.Job-Card {
+	// border: 1px solid blue;
+	position: relative;
+	padding: 1.5em;
+	display: grid;
+	background-color: white;
+	grid-template-columns: 65% 35%;
+	gap: 1em;
+	border-radius: 20px;
+
+	.title {
+
+		.company {
+			display: flex;
+			gap: 1em;
+			align-items: center;
+
+			.logo {
+				width: 60px;
+				height: 60px;
+				border-radius: 50%;
+			}
+		}
+
+		.description {
+
+			padding: 1em;
+		}
+
+	}
+
+	.subtitle {
+		p {
+			margin-bottom: 5px;
+		}
+
+		.job-title {
+			font-size: 1.25rem;
+			font-weight: bold;
+			text-transform: capitalize;
+		}
+
+		.job-subtitle {
+			font-size: 1.025rem;
+			font-weight: bold;
+			text-transform: capitalize;
+		}
+	}
+
+
+
+	.goback {
+		background-color: red;
+		// transform: translateZ(-100);
+	}
+
+
+}

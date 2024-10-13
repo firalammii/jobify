@@ -1,0 +1,94 @@
+@use "global";
+
+.table-con {
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 10px;
+    display: grid;
+    grid-template-rows: 30px auto 50px;
+
+    .title {
+        font-size: 13px;
+        font-weight: 700;
+        padding: 5px 10px;
+        letter-spacing: 0.02em;
+        color: global.$table-title;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .table {
+        overflow-x: auto;
+        color: global.$table-body;
+        display: grid;
+        grid-template-rows: 34px auto;
+    }
+
+    .thead {
+        font-size: 13px;
+        font-weight: 500;
+        color: global.$table-title;
+        background-color: global.$thead-bgc;
+        text-transform: uppercase;
+
+        // similar with row except for hovering
+        display: grid;
+        align-items: center;
+        color: global.$table-body;
+        border-bottom: 0.1px solid global.$trow-border;
+    }
+
+    .tbody {
+        font-size: 12px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        display: grid;
+        grid-auto-rows: 40px;
+        color: global.$table-body;
+        background-color: global.$awwssse-white;
+    }
+
+    .outer-rows {
+        // year and others
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 5px;
+        align-items: center;
+        border-bottom: 0.1px solid global.$trow-border;
+        overflow-x: hidden;
+    }
+
+    .inner-rows {
+        display: grid;
+        align-items: center;
+        gap: 5px;
+        border-bottom: 0.1px solid global.$trow-border;
+    }
+
+    .row {
+        display: grid;
+        // grid-template-columns: repeat(); // inline styling
+        align-items: center;
+        color: global.$table-body;
+        border-bottom: 0.1px solid global.$trow-border;
+
+        &:hover {
+            background-color: global.$hover-blue;
+            cursor: pointer;
+            // font-weight: 700;
+            font-size: 1.025rem;
+            // scale: global.$scale;
+        }
+    }
+
+    .cell {
+        overflow-x: auto;
+        padding: 2px 5px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+    }
+}

@@ -1,0 +1,133 @@
+@use "global";
+
+@mixin Mobile {
+    @media screen and (max-width:480px) {
+        @content;
+    }
+}
+
+@mixin Mobile-Plus {
+    @media screen and (max-width:598px) {
+        @content;
+    }
+}
+
+@mixin Tablet {
+    @media screen and (max-width:768px) {
+        @content;
+    }
+}
+
+@mixin Laptop {
+    @media screen and (max-width:1024px) {
+        @content;
+    }
+}
+
+.sidebar {
+    color: global.$awwssse-blue;
+    grid-column: 1/span 2;
+    grid-row: 1/-1;
+    background: global.$sidebar-bgc;
+    font-size: 17px;
+    padding-bottom: 8px;
+    box-shadow: 20px 0px 20px 0px #0E45B70A;
+    border-radius: 0px 10px 0px 0px;
+
+    display: grid;
+    grid-template-rows: repeat(12, 1fr);
+    align-items: center;
+    gap: 5px;
+    z-index: 1;
+
+    @include Mobile() {
+        width: 46px;
+    }
+
+    /* ************************** Header  **************************** */
+
+    .header {
+        // display: flex;
+        // dlex
+        // align-items: center;
+
+        .logo--name {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        @include Laptop() {
+            flex-direction: column;
+            justify-content: center;
+            padding: 10px 0px;
+        }
+
+        .company-logo {
+            width: 66px;
+            border-radius: 50%;
+
+            @include Mobile-Plus() {
+                width: 100%;
+            }
+        }
+
+        .company-name {
+            font-weight: 700;
+            color: global.$awwssse-blue;
+            font-size: large;
+
+            @include Mobile-Plus() {
+                display: none;
+            }
+        }
+
+        .hor-line {
+            border: 0.1px solid global.$hor-line;
+        }
+    }
+
+    /* ************************** Sidebar items  **************************** */
+
+    .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        text-decoration: none;
+
+        @include Laptop {
+            font-size: smaller;
+        }
+
+        @include Tablet {
+            flex-direction: column;
+        }
+
+        .sidebar-item-label {
+            text-transform: capitalize;
+
+            @include Mobile-Plus() {
+                display: none;
+            }
+        }
+    }
+}
+
+.sidebar-item:hover {
+    color: global.$awwssse-white;
+    background-color: global.$hover-blue;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.selected {
+    color: global.$awwssse-white;
+    background-color: global.$awwssse-blue;
+    font-weight: 700;
+}
+
+.offscreen {
+    position: absolute;
+    left: -9999px;
+}

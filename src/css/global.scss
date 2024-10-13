@@ -1,0 +1,81 @@
+$awwssse-blue: #0E45B7;
+$hover-blue: #0E45B726;
+$awwssse-sky: #3FBDF1;
+$hover-sky: #DCF3FD;
+$awwssse-green: #71DDB1;
+$hover-green: #E1FDF2;
+$awwssse-yellow: #FFC700;
+$hover-yellow: #FDF6DF;
+$awwssse-red: #FF0000;
+$hover-red: #FCF2F2;
+
+$awwssse-gray: #9B9B9B;
+
+$awwssse-white: #FFFFFF;
+$report-title: #231F20;
+
+$sidebar-bgc: #FFFFFF;
+$navbar-bgc: #F2F8FD;
+$navbar-bgc1: #deeefa;
+
+$hor-line: #3FBDF133;
+
+$table-body: #212121;
+$table-title: #231F20;
+$thead-bgc: #FAFAFB;
+$trow-border: #E0E0E0;
+
+$modal-overlay-bgc: #BEBDBDCC;
+
+$search-i-h: 40px;
+$scale: 1.125;
+
+// variables.scss
+// $white-color: #fcf5ed;
+// $dark-color: #402f2b;
+// $light-color: #e6d5c3;
+// $medium-color: #977978;
+// $alert-color: #cb492a;
+// $light-black-color: #706e72;
+// $black-color: #414042;
+
+// the :export directive is the magic sauce for webpack
+:export {
+    awwssseBlue: $awwssse-blue;
+    hoverBlue: $hover-blue;
+    awwssseWhite: $awwssse-white;
+    awwssseSky: $awwssse-sky;
+    hoverSky: $hover-sky;
+    awwssseGreen: $awwssse-green;
+    hoverGreen: $hover-green;
+    awwssseYellow: $awwssse-yellow;
+    hoverYellow: $hover-yellow;
+    awwssseRed: $awwssse-red;
+    awwssseGray: $awwssse-gray;
+    hoverRed: $hover-red;
+
+    reportTitle: $report-title;
+    sidebarBgc: $sidebar-bgc;
+    navbarBgc: $navbar-bgc;
+
+    horLine: $hor-line;
+    tableBody: $table-body;
+    trowBorder: $trow-border;
+    tableTitle: $table-title;
+    theadBgc: $thead-bgc;
+    modalOverlayBgc: $modal-overlay-bgc;
+
+    searchIh: $search-i-h;
+    scale: $scale;
+
+    //************
+
+    //   whitecolor: $white-color;
+    //   darkcolor: $dark-color;
+    //   lightcolor: $light-color;
+    //   mediumcolor: $medium-color;
+    //   alertcolor: $alert-color;
+    //   lightblackcolor: $light-black-color;
+    //   blackcolor: $black-color;
+
+}

@@ -1,0 +1,38 @@
+:root {
+    --blue: #1e90ff;
+    --app-blue: #0E45B7;
+    --light-blue: #0E45B726;
+    --sky: #3FBDF1;
+    --light-sky: #DCF3FD;
+    --app-green: #71DDB1;
+    --green: rgb(0, 128, 0);
+    --light-green: #71DDB1;
+    --app-yellow: #FFC700;
+    --light-yellow: #FDF6DF;
+    --red: #FF0000;
+    --light-red: #FCF2F2;
+    --dark-gray: #9B9B9B;
+    --slight-blue: #231F20;
+    --slate: #F2F8FD;
+    --slate2: #deeefa;
+    --hor-line: #3FBDF133;
+    --table-body: #212121;
+    --table-head: #FAFAFB;
+    --dark: #231F20;
+    --table-border: #E0E0E0;
+    --overlay: #BEBDBDCC;
+    --white: #ffffff;
+}
+
+::-webkit-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    display: none;
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body{
+    background-color: rgb(241, 245, 241);
+}

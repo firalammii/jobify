@@ -1,0 +1,47 @@
+@use "global";
+
+.navbar {
+    grid-column: 3/-1;
+    grid-row: 1/2;
+    padding: 5px 20px 5px 5px;
+    background: global.$navbar-bgc;
+    background: global.$navbar-bgc1;
+    display: flex;
+    align-items: center;
+    // border: 1px solid red;
+
+    .online--logout-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 17px;
+        color: global.$awwssse-blue;
+
+        .active {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: global.$awwssse-green;
+            // background-color: green;
+        }
+    }
+
+    .logout-btn {
+        background-color: global.$awwssse-blue;
+        color: global.$awwssse-white;
+        border: none;
+        font-size: 1.125rem;
+    }
+
+}
+
+.widescreen-navbar {
+    grid-column: 1/-1;
+    grid-row: 1/2;
+}

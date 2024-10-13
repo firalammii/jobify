@@ -1,0 +1,176 @@
+@use "global";
+
+@mixin Tablet {
+    @media screen and (max-width:768px) {
+        @content;
+    }
+}
+
+.ManageUser-comp {
+    width: 70%;
+    height: 85%;
+    overflow: auto;
+    border-radius: 10px;
+    background-color: global.$awwssse-white;
+    padding: 20px 20px 60px;
+    position: relative;
+
+    @include Tablet() {
+        width: 100%;
+        height: 100%;
+    }
+
+    .manage-user-frame {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: grid;
+        gap: 20px;
+
+        .umgt-head {
+            display: grid;
+            gap: 20px;
+
+            .title-n-close-btn-con {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                .title {
+                    text-transform: uppercase;
+                    font-weight: 700;
+                    color: global.$table-title;
+                }
+            }
+
+            .profile-n-colorful-btns-con {
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, auto));
+                align-items: center;
+                justify-content: space-between;
+                gap: 20px;
+
+                .buttons {
+                    overflow-x: auto;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                }
+            }
+        }
+
+        .body {
+            overflow: auto;
+
+            .div-as-form {
+                height: 100%;
+                padding: 10px 0;
+                display: grid;
+                overflow-x: auto;
+                align-items: center;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 40px 20px;
+                text-transform: uppercase;
+                color: global.$table-body;
+
+                .label-n-inputs-con {
+                    display: grid;
+                    height: 88px;
+                    font-size: 13px;
+                    text-transform: uppercase;
+
+                    .label {
+                        text-transform: uppercase;
+                        align-self: center;
+                    }
+
+                    .input {
+                        padding: 0 5px;
+                        border-radius: 5px;
+                        border: 1px solid global.$hor-line;
+                        text-transform: uppercase;
+
+                    }
+
+                    .error {
+                        border: 2px solid red;
+                    }
+                }
+
+                //form-button-con goes here
+
+            }
+        }
+    }
+}
+
+.form-buttons-con {
+    align-self: flex-end;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    overflow-x: auto;
+
+    .button {
+        width: calc(100% - 55px);
+        height: 45px;
+        border-radius: 5px;
+        white-space: nowrap;
+        border: 1px solid global.$hor-line;
+
+        &:hover {
+            background-color: global.$hover-blue;
+            color: global.$awwssse-blue;
+            font-weight: 700;
+        }
+    }
+
+    .circular-btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background-color: lightgray;
+        color: global.$awwssse-white;
+
+        &:hover {
+            background-color: transparent;
+            color: blue;
+        }
+    }
+
+    .success-btn {
+        background-color: global.$awwssse-green;
+        color: global.$awwssse-white;
+        font-weight: 700;
+    }
+
+    .active-btn {
+        background-color: global.$awwssse-blue;
+        color: global.$awwssse-white;
+    }
+}
+
+.eye-btn-con {
+    background-color: global.$modal-overlay-bgc;
+    color: global.$awwssse-white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+
+    .eye-btn {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        place-items: center;
+    }
+
+    &:hover {
+        background-color: global.$awwssse-gray;
+        color: global.$awwssse-blue;
+    }
+}

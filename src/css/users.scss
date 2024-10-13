@@ -1,0 +1,48 @@
+@use "global";
+@mixin Tablet {
+    @media screen and (max-width:768px) {
+        @content;
+    }
+}
+@mixin TV {
+    @media screen and (min-width:1201px){
+        @content;
+    }
+}
+
+.Users {
+    padding: 20px;
+    width: 80%;
+    overflow:auto;
+    border-radius: 10px;
+    background-color: global.$awwssse-white;
+
+    @include Tablet() {
+        width: 100%;
+    }
+    @include TV() {
+        width: 65%;
+    }
+
+    .users-frame {
+        display: grid;
+        gap: 20px;
+        grid-template-rows: 40px auto;
+        .header {
+            display: grid;
+            gap: 20px;
+    
+            .title-n-close-btn-con {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+    
+                .title {
+                    text-transform: uppercase;
+                    font-weight: 700;
+                    color: global.$table-title;
+                }
+            }
+        }
+    }
+}
