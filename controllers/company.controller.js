@@ -11,14 +11,14 @@ const getAllCompanies = async (req, res) => {
 			.limit(limit)
 			.populate("jobs");
 
-		const totalCompanies = await CompanyModel.countDocuments();
+		const totalNum = await CompanyModel.countDocuments();
 
 		return res.status(200).json({
 			length: companies.length,
 			companies,
-			currentPage: page,
+			currPage: page,
 			totalPages: Math.ceil(totalCompanies / limit),
-			totalCompanies
+			totalNum
 		});
 	} catch (error) {
 		console.error(error);
