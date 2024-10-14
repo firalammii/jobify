@@ -23,6 +23,7 @@ const userSlice = createSlice({
 			sessionStorage.setItem(sessionStorageKey, JSON.stringify(action.payload));
 		},
 		signInFailure: (state, action) => {
+			state.currUser = null;
 			state.error = action.payload;
 			state.loading = false;
 		},

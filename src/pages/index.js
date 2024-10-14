@@ -1,11 +1,14 @@
 export { default as About } from './About';
 export { default as AddCompany } from './AddCompany';
 export { default as AddJob } from './AddJob';
+// export { default as Companies } from './Companies';
 export { default as Companies } from './Companies';
 
 export { default as Home } from './Home';
 
-export { default as Jobs } from './JobListings';
+// export { default as Jobs } from './JobListings';
+
+export { default as Jobs } from './Jobs';
 
 export { default as Missing } from './Missing';
 

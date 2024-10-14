@@ -13,8 +13,8 @@ const Button = ({ label, onClickFunction, type, style }) => {
 
     return (
         <button
-            className='hover:scale-105'
-            style={button}
+            className='min-w-40 p-2 whitespace-nowrap rounded-md border-none hover:scale-105'
+            style={style}
             type={type || "button"}
             onClick={() => onClickFunction()}
         >

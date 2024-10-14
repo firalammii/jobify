@@ -7,7 +7,7 @@ import storage from 'redux-persist/lib/storage';
 
 const rootReducer = combineReducers({
   user: userReducer,
-  jobObj: jobReducer,
+  job: jobReducer,
   company: companyReducer
 });
 

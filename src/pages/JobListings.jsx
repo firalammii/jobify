@@ -20,7 +20,7 @@ const JobListings = ({ editHandler }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const { jobs, totalJobs, currPage, rowsPerPage, totalPages, error ,loading } = useSelector(state => state.jobObj);
+    const { jobs, totalJobs, currPage, rowsPerPage, totalPages, error, loading } = useSelector(state => state.job);
 
 
     function closeUserPage () {

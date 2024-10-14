@@ -1,19 +1,28 @@
 import React, { useEffect } from 'react';
-import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import { ROLES } from '../data/roles';
+import { CircularProgress } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
-import { ROLES } from '../data/roles';
-import { companiesTableheads } from '../data/table-heads-data';
-import { fetchCompaniesFailure, fetchCompaniesStart, fetchCompaniesSuccess } from '../redux/companySlice';
-import Company from './Company';
-import { Pagination } from '../components';
+import { jobsTableHeads } from '../data/table-heads-data';
 
-const url = "/api/companies";
+import { useNavigate } from 'react-router-dom';
+import { fetchJobsFailure, fetchJobsStart, fetchJobsSuccess } from '../redux/jobSlice';
+import { JobDatails } from '../components';
+import Pagination from '../components/Pagination';
+
+const url = "/api/jobs";
 const rowsOptions = [4, 8, 12];
 
-function Companies () {
+function Jobs () {
 	const [rowsPerPage, setRowsPerPage] = React.useState(rowsOptions[0]);
 	const [page, setPage] = React.useState(1);
 	const [modal, setModal] = React.useState(null);
@@ -23,42 +32,35 @@ function Companies () {
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		dispatch(fetchCompaniesStart());
+		dispatch(fetchJobsStart());
 		const query = `page=${page}&limit=${rowsPerPage}`;
 		let isMounted = true;
 		const controller = new AbortController();
+		const fetchJobs = async () => {
 
-		const fetchCompanies = async () => {
 			try {
 				const response = await axios.get(url + `?${query}`, {
 					signal: controller.signal
 				});
 
-				const data = await response.json();
-				if (data.success === false)
-					dispatch(fetchCompaniesFailure(data.message));
-
-				isMounted && dispatch(fetchCompaniesSuccess(response.data));
+				isMounted && dispatch(fetchJobsSuccess(response.data));
 			} catch (err) {
 				console.error(err);
-				dispatch(fetchCompaniesFailure(err));
+				dispatch(fetchJobsFailure(err));
 				navigate({ from: location, replace: true });
+
 			}
 		};
-		fetchCompanies();
+
+		fetchJobs();
+
 		return () => {
 			isMounted = false;
 			controller.abort();
 		};
-	}, [rowsPerPage, page]);
+	}, [page, rowsPerPage]);
 
-
-
-
-	const { length: currTableLen, loading, error, companies, totalNum, currPage, totalPages } = useSelector(state => state.company);
-
-	// const companyObj = useSelector(state => state.company);
-	// console.log(companyObj)
+	const { jobs, totalNum, length, currPage, totalPages, error, loading } = useSelector(state => state.job);
 
 	const handleChangePage = async (value) => {
 		if (currPage + value > totalPages || currPage + value <= 0)
@@ -85,7 +87,7 @@ function Companies () {
 					<CircularProgress />
 					:
 					modal ?
-						<Company data={modal} back={back} />
+						<JobDatails data={modal} back={back} />
 						:
 						<Paper sx={{ width: '100%', overflow: 'hidden', }}>
 							<TableContainer
@@ -94,30 +96,30 @@ function Companies () {
 								<Table stickyHeader aria-label="sticky table">
 									<TableHead>
 										<TableRow>
-											{companiesTableheads?.map((column) => (<TableCell key={column.id}> {column.label}</TableCell>))}
+											{jobsTableHeads?.map((column) => (<TableCell key={column.id}> {column.label}</TableCell>))}
 										</TableRow>
 									</TableHead>
-									<TableBody style={{ overflow: "auto", }} >
+									<TableBody style={{ overflow: "auto" }} >
 										{
-											companies?.map((body, index) => {
+											jobs?.map((body, index) => {
 												return (
 													<TableRow
 														key={body?._id}
 														hover
 														role="checkbox"
 														tabIndex={-1}
-														style={{ cursor: "pointer", height: "40px" }}
+														style={{ cursor: "pointer" }}
 														onClick={() => selectModal(body)}
 													>
-														<TableCell style={{ height: "40px" }}>{index + 1}</TableCell>
-														<TableCell><img className='rounded-full h-7 w-7 object-cover' src={body.companyLog} /></TableCell>
-														<TableCell>{body?.companyName}</TableCell>
-														<TableCell>{body.website}</TableCell>
-														<TableCell>
-															<p>{body.telNumber?.line}</p>
-															<p>{body.telNumber?.mobile}</p>
-														</TableCell>
+														<TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
+														<TableCell>{body?.title}</TableCell>
+														<TableCell>{body?.jobType}</TableCell>
+														<TableCell>{body.salary?.minSalary} - {body?.salary?.maxSalary} {body.salary?.currency}</TableCell>
+														<TableCell>{body.experience?.minYears} - {body?.experience?.maxYears} Years</TableCell>
+														{/* <TableCell>{body?.remoteOption}</TableCell> */}
 														<TableCell>{body?.location?.city}, {body?.location?.country} </TableCell>
+														<TableCell>{new Date(body?.postingDate).toLocaleDateString()}</TableCell>
+														<TableCell>{body?.status}</TableCell>
 													</TableRow>
 												);
 											})
@@ -151,4 +153,4 @@ function Companies () {
 	);
 }
 
-export default Companies;
+export default Jobs;

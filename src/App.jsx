@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import { About, Home, Profile, SignIn, SignUp, Companies, AddCompany, Jobs, AddJob, Users, Unauthorized, Missing, } from './pages';
-import { RequireAuth, AppHeader, JobDatails } from './components';
+import { About, Home, Profile, SignIn, SignUp, AddCompany, Jobs, AddJob, Users, Unauthorized, Missing, Companies } from './pages';
+import { RequireAuth, AppHeader, JobDatails, } from './components';
 import { ROLES } from './data/roles';
 
 export default function App() {

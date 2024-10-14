@@ -2,11 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
 	jobs: [],
-	totalJobs: 0,
+	totalNum: 0,
 	currPage: 1,
-	rowsPerPage: 10,
-	totalPages: 0,
-
+	length: 0,
+	totalPages: 1,
 	error: null,
 	loading: false,
 };
@@ -21,9 +20,11 @@ const jobSlice = createSlice({
 
 		fetchJobsSuccess: (state, action) => {
 			state.jobs = action.payload.jobs;
-			state.totalJobs = action.payload.totalJobs;
-			state.currPage = action.payload.currentPage;
+			state.totalNum = action.payload.totalNum;
+			state.currPage = action.payload.currPage;
 			state.totalPages = action.payload.totalPages;
+			state.length = action.payload.length;
+
 			state.loading = false;
 			state.error = null;
 		},

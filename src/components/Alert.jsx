@@ -1,61 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 import { DoneRounded, BlockRounded } from '@mui/icons-material';
-import * as colors from '../css/global.scss';
-
-const styles = {
-    container: {
-        alignSelf: "center",
-        maxWidth: "700px",
-        width: "70%",
-        height: "300px",
-        borderRadius: "10px",
-        padding: "40px",
-        display: "grid",
-        placeItems: "center",
-        gap: "20px",
-        backgroundColor: colors.awwssseWhite,
-    },
-    circle: {
-        height: "100px",
-        width: "100px",
-        borderRadius: "50%",
-        fontWeight: 700,
-        display: "grid",
-        placeItems: "center",
-        color: colors.awwssseWhite,
-    },
-    body: {
-        color: colors.awwssseBlue,
-        fontWeight: 500,
-        fontSize: "14px",
-        textTransform: "uppercase",
-        textAlign: "center",
-    },
-    okBtn: {
-        backgroundColor: colors.awwssseBlue,
-        width: "130px",
-        padding: "8px",
-        borderRadius: "5px",
-        color: "white",
-        fontWeight: 700,
-        textAlign: "center",
-        border: "none",
-    }
-};
 
 const Alert = ({ returnFunction, success, message }) => {
-
     const btnRef = useRef(null);
+
     useEffect(() => {
         btnRef.current.focus();
     }, []);
+
     return (
         <div
-            className="shadow"
-            style={styles.container}
+            className='shadow-md w-2/3 h-72 m-w-200 rounded-xl p-10 grid place-items-center gap-5 bg-white'
             onClick={(e) => e.stopPropagation()}
         >
-            <div style={{ ...styles.circle, backgroundColor: success ? colors.awwssseGreen : colors.awwssseRed }}>
+            <div className={`h-24 w-24 rounded-full font-bold grid place-items-center text-white ${success ? 'bg-green-600' : 'bg-red-600'}`}>
                 {
                     success ?
                         <DoneRounded fontSize='large' />
@@ -63,11 +21,11 @@ const Alert = ({ returnFunction, success, message }) => {
                 }
             </div>
 
-            <div style={styles.body}>
+            <div className='text-slate-500 uppercase text-center'>
                 {message}
             </div>
 
-            <button ref={btnRef} style={styles.okBtn} onClick={returnFunction} >{success ? "Ok" : "Back"}</button>
+            <button className='bg-blue-600 w-32 p-2 rounded-md text-white font-bold border-none text-center' ref={btnRef} onClick={returnFunction} >{success ? "Ok" : "Back"}</button>
 
         </div>
     );

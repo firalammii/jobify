@@ -25,7 +25,7 @@ export default function AppHeader () {
     }
   }, [location.search]);
   return (
-    <header className='bg-slate-200 shadow-md sticky top-0'>
+    <header className='bg-slate-200 shadow-md sticky top-0 z-50'>
       <div className='flex justify-between items-center max-w-6xl mx-auto p-3'>
         <Link to='/'>
           <h1 className='font-bold text-sm sm:text-xl flex flex-wrap text-transform: capitalize'>
@@ -87,7 +87,7 @@ export default function AppHeader () {
               users
             </li>
           </Link>
-          {currUser ? (
+          {currUser?.accessToken ? (
             <Link to='/profile'>
               <div className='flex gap-2 items-center'>
                 <span className='w-3 h-3 rounded-full bg-green-700'></span>
