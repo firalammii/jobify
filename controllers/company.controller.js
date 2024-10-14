@@ -17,7 +17,7 @@ const getAllCompanies = async (req, res) => {
 			length: companies.length,
 			companies,
 			currPage: page,
-			totalPages: Math.ceil(totalCompanies / limit),
+			totalPages: Math.ceil(totalNum / limit),
 			totalNum
 		});
 	} catch (error) {

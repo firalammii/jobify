@@ -57,14 +57,14 @@ const getAllJobs = async (req, res) => {
 			.skip((page - 1) * limit)
 			.limit(limit);
 
-		const totalJobs = await JobModel.countDocuments(searchQuery);
+		const totalNum = await JobModel.countDocuments(searchQuery);
 
 		res.json({
 			length: jobs.length,
 			jobs,
-			currentPage: page,
-			totalPages: Math.ceil(totalJobs / limit),
-			totalJobs
+			currPage: page,
+			totalPages: Math.ceil(totalNum / limit),
+			totalNum
 		});
 
 	} catch (error) {

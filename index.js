@@ -18,6 +18,7 @@ const rootRoute = require('./routes/root');
 const connectDB = require('./config/db_conn');
 const { authorize } = require('./middlewares/authorize');
 const { ROLES_LIST } = require('./config/roles');
+const { createJobDescAI } = require('./controllers/geminiAI');
 
 const app = express();
 dotenv.config();
@@ -38,6 +39,7 @@ app.use('/api/refresh', refreshRoute);
 
 // app.use(authenticate);
 // app.use(authorize(ROLES_LIST.ADMIN));
+app.post('/api/gemini', createJobDescAI);
 // app.use('/api/gemini', geminiAIRoute);
 app.use('/api/jobs', jobsRoute);
 app.use('/api/companies', companiesRoute);
