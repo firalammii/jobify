@@ -291,6 +291,7 @@ function AddCompany ({ tobeEditted }) {
 									value={tobeEditted ? "Update Company" : "Add Company"}
 								/>
 							</div>
+
 						</div>
 					</form>
 			}

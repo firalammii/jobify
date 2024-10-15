@@ -35,4 +35,4 @@ function Pagination ({ rowsOptions, onRowsPerPageChange, currPage, totalPages, r
 	);
 }
 
-export default memo(Pagination);
+export default Pagination;

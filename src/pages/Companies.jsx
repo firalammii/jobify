@@ -1,22 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
 import { ROLES } from '../data/roles';
-import { companiesTableheads } from '../data/table-heads-data';
+import { companiesTableheads, rowsOptions } from '../data/table-heads-data';
 import { fetchCompaniesFailure, fetchCompaniesStart, fetchCompaniesSuccess } from '../redux/companySlice';
 import Company from './Company';
 import { Pagination } from '../components';
 
 const url = "/api/companies";
-const rowsOptions = [4, 8, 12];
 
 function Companies () {
-	const [rowsPerPage, setRowsPerPage] = React.useState(rowsOptions[0]);
-	const [page, setPage] = React.useState(1);
-	const [modal, setModal] = React.useState(null);
+	const [modal, setModal] = useState(null);
+	const [page, setPage] = useState(1);
+	const [rowsPerPage, setRowsPerPage] = useState(rowsOptions[0]);
 
 	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
@@ -24,13 +23,13 @@ function Companies () {
 
 	useEffect(() => {
 		dispatch(fetchCompaniesStart());
-		const query = `page=${page}&limit=${rowsPerPage}`;
+		const query = `?page=${page}&limit=${rowsPerPage}`;
 		let isMounted = true;
 		const controller = new AbortController();
 
 		const fetchCompanies = async () => {
 			try {
-				const response = await axios.get(url + `?${query}`, {
+				const response = await axios.get(url + query, {
 					signal: controller.signal
 				});
 

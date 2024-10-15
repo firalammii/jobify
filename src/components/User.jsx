@@ -1,15 +1,22 @@
 import React from 'react';
+import { CloseRounded } from '@mui/icons-material';
+
 import Button from './Button';
+
 import '../css/overlay.scss';
 import { ROLES, roles } from '../data/roles';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { deleteUserFailure, deleteUserSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from '../redux/userSlice';
+
+
 const User = ({ user, onClose }) => {
 
 	const url = `/api/users/${user?._id}`;
 	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
+
+	const { currUser, users } = useSelector(state => state.user);
 
 	const makeSuper = async () => {
 		const alreadySuper = user?.roles?.includes(ROLES.super);
@@ -30,6 +37,7 @@ const User = ({ user, onClose }) => {
 	};
 	const makeAdmin = async () => {
 		const alreadyAdmin = user?.roles?.includes(ROLES.admin);
+		const isCurrUser = user._id === currUser._id;
 		if (alreadyAdmin)
 			return;
 		dispatch(updateUserStart());
@@ -85,10 +93,8 @@ const User = ({ user, onClose }) => {
 	]
 
 	return (
-
-
 		<div className='overlay w-full h-full fixed -z-10' onClick={onClose}>
-			<div className='p-8 grid shadow-sm w-2/3 h-1/2 bg-white my-auto mx-auto  rounded-xl' onClick={e => e.stopPropagation()}>
+			<div className='p-8 grid shadow-sm w-2/3 h-1/2 bg-white my-auto mx-auto  rounded-xl relative' onClick={e => e.stopPropagation()}>
 				<div className='flex gap-7 items-center'>
 					<img
 						className='rounded-full h-24 w-24 object-cover'
@@ -111,6 +117,9 @@ const User = ({ user, onClose }) => {
 
 
 				</div>
+				<button onClick={onClose} className='text-slate-500 bg-white hover:bg-red-300 hover:text-white rounded-full absolute top-8 right-8' >
+					<CloseRounded fontSize='medium' />
+				</button>
 			</div>
 		</div >
 	);

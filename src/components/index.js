@@ -1,3 +1,4 @@
+export { default as AddButton } from './AddButton';
 export { default as Alert } from './Alert';
 export { default as AppHeader } from './AppHeader';
 export { default as Button } from './Button';

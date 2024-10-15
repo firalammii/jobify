@@ -1,18 +1,10 @@
-import React, { useEffect } from 'react';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
+import React, { useState, useEffect } from 'react';
+import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
 import { ROLES } from '../data/roles';
-import { CircularProgress } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
-import { jobsTableHeads } from '../data/table-heads-data';
+import { jobsTableHeads, rowsOptions } from '../data/table-heads-data';
 
 import { useNavigate } from 'react-router-dom';
 import { fetchJobsFailure, fetchJobsStart, fetchJobsSuccess } from '../redux/jobSlice';
@@ -20,12 +12,11 @@ import { JobDatails } from '../components';
 import Pagination from '../components/Pagination';
 
 const url = "/api/jobs";
-const rowsOptions = [4, 8, 12];
 
 function Jobs () {
-	const [rowsPerPage, setRowsPerPage] = React.useState(rowsOptions[0]);
-	const [page, setPage] = React.useState(1);
-	const [modal, setModal] = React.useState(null);
+	const [modal, setModal] = useState(null);
+	const [page, setPage] = useState(1);
+	const [rowsPerPage, setRowsPerPage] = useState(rowsOptions[0]);
 
 	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
@@ -33,13 +24,13 @@ function Jobs () {
 
 	useEffect(() => {
 		dispatch(fetchJobsStart());
-		const query = `page=${page}&limit=${rowsPerPage}`;
+		const query = `?page=${page}&limit=${rowsPerPage}`;
 		let isMounted = true;
 		const controller = new AbortController();
 		const fetchJobs = async () => {
 
 			try {
-				const response = await axios.get(url + `?${query}`, {
+				const response = await axios.get(url + query, {
 					signal: controller.signal
 				});
 

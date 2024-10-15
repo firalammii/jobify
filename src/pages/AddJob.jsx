@@ -58,7 +58,7 @@ function AddJob ({ tobeEditted }) {
 
 
 	useEffect(() => {
-		if (state.company && state.title && state.applyURL.length && state.experience) {
+		if (state.company && state.title && state.applyURL && state.experience) {
 			generateJoDesc();
 		}
 	}, [state]);
@@ -67,15 +67,12 @@ function AddJob ({ tobeEditted }) {
 		const prompt = {
 			companyName: state.company?.companyName,
 			title: state.title,
-			skills: state.skills,
 			website: state.company?.website,
 			applyURL: state.applyURL
 		};
-
 		const result = await axios.post('/api/gemini', prompt);
-		// const result = await axios('/api/gemini', { method: "POST", body: prompt });
-		setJobDesc(result);
-		console.log(result);
+		setJobDesc(result.data);
+		console.log(result.data);
 	};
 
 	const clearFields = () => {
@@ -91,6 +88,10 @@ function AddJob ({ tobeEditted }) {
 	};
 	const handleLocation = (fieldName, value) => {
 		setState({ ...state, location: { ...state.location, [fieldName]: value } });
+	};
+	const save = () => {
+		setState({ ...state, description: JobDesc });
+		setJobDesc("");
 	};
 
 	const handleSubmit = async (e) => {
@@ -134,7 +135,7 @@ function AddJob ({ tobeEditted }) {
 								className='bg-white shadow-md rounded-md resize-none w-full border-none outline-none'
 								cols={100}
 								rows={20}
-								value={state.description}
+								value={JobDesc}
 								onChange={(e) => setJobDesc(e.target.value)}
 							>
 							</textarea>
@@ -147,7 +148,7 @@ function AddJob ({ tobeEditted }) {
 								<Button
 									label="Save"
 									style={{ backgroundColor: "green", color: "white" }}
-									onClickFunction={() => setJobDesc("")}
+									onClickFunction={save}
 								/>
 							</div>
 
@@ -155,8 +156,6 @@ function AddJob ({ tobeEditted }) {
 						:
 						<form className="form" onSubmit={handleSubmit} >
 							<div className="inputs-con">
-
-
 
 								<div className="label-input-con">
 									<label htmlFor="jobCategory" className="label"> Job Category</label>
@@ -313,7 +312,7 @@ function AddJob ({ tobeEditted }) {
 										autoComplete='on'
 									/>
 								</div>
-								<div className="label-input-con">
+								{/* <div className="label-input-con">
 									<label htmlFor="skills" className="label"> Preferred Skills </label>
 									<input
 										className='input'
@@ -325,7 +324,7 @@ function AddJob ({ tobeEditted }) {
 										required
 										autoComplete='on'
 									/>
-								</div>
+								</div> */}
 
 								<div className="label-input-con">
 									<p className="label">Experience Range in Years</p>
