@@ -1,12 +1,9 @@
 @use "global";
 
 .AddComp {
-	// border: 2px solid red;
 	width: 100%;
 	height: 100%;
-	padding: 1em 0;
-	// overflow: auto;	
-
+	// border: 2px solid red;
 }
 
 form {
@@ -17,25 +14,22 @@ form {
 		.inputs-con {
 			width: 100%;
 			height: 100%;
-			padding: 10px 0;
+			padding: 10px;
 			display: grid;
-			overflow-x: auto;
 			align-items: center;
-			grid-template-columns: repeat(3, minmax(200px, 1fr));
+			grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+				// grid-template-columns: repeat(3, minmax(200px, 1fr));
 			align-items: center;
 			gap: 20px;
 
-			// border: 2px solid blue;
-
 			.label-input-con {
-				padding: 1em;
+				padding: 2em;
 				display: grid;
 				background-color: global.$awwssse-white;
 				font-size: 13px;
 				text-transform: uppercase;
 				border-radius: 8px;
 				row-gap: 20px;
-
 
 				// border: 2px solid red;
 
@@ -64,17 +58,11 @@ form {
 
 				}
 
-				// .small--input {
-				// 	width: 50%;
-				// }
-
 				.form-btn {
 					background-color: global.$awwssse-blue;
 					color: global.$awwssse-white;
 					font-weight: bold;
 					cursor: pointer;
-					// grid-column: 1/-1;
-					// grid-row: 2/-1;
 
 					// border: 2px solid red;
 

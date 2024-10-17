@@ -38,7 +38,7 @@ function JobDatails ({ data, back }) {
 					</div>
 				</div>
 
-				<div className='w-3/5 flex-col items-center justify-center shadow-sm gap-4 rounded-md '>
+				<div className='w-3/5 h-96 flex-col items-center justify-center shadow-sm gap-4 rounded-md '>
 					<div className='subtitle h-2/5 grid grid-cols-2 gap-2 whitespace-nowrap mb-3'>
 						<div>
 							<p>Job Category: <span className='font-semibold' >{data?.jobCategory}</span></p>
@@ -60,8 +60,9 @@ function JobDatails ({ data, back }) {
 						</div>
 					</div>
 
-					<div className='h-3/5 overflow-auto p-5 bg-white rounded-md '>
+					<div className='h-full overflow-auto p-5 bg-white rounded-md '>
 						<p className='font-semibold'>Job Description</p>
+						<p className='text-justify rounded-xl'>{data?.description} Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem, ratione, temporibus ut sequi consequuntur eveniet consectetur, voluptates similique sit voluptatum ipsam quasi quam dolore fugit delectus vitae eligendi distinctio libero iure. Minima sint dolores exercitationem aspernaturturi provident incidunt, at voluptate in eligendi. Quidem earum impedit maxime quisquam doloremque ratione, eum consectetur accusamus culpa nihil facere architecto. </p>
 						<p className='text-justify rounded-xl'>{data?.description} Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem, ratione, temporibus ut sequi consequuntur eveniet consectetur, voluptates similique sit voluptatum ipsam quasi quam dolore fugit delectus vitae eligendi distinctio libero iure. Minima sint dolores exercitationem aspernaturturi provident incidunt, at voluptate in eligendi. Quidem earum impedit maxime quisquam doloremque ratione, eum consectetur accusamus culpa nihil facere architecto. </p>
 					</div>
 				</div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
+import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
@@ -8,7 +8,7 @@ import { ROLES } from '../data/roles';
 import { companiesTableheads, rowsOptions } from '../data/table-heads-data';
 import { fetchCompaniesFailure, fetchCompaniesStart, fetchCompaniesSuccess } from '../redux/companySlice';
 import Company from './Company';
-import { Pagination } from '../components';
+import { AddButton, Pagination } from '../components';
 
 const url = "/api/companies";
 
@@ -29,15 +29,14 @@ function Companies () {
 
 		const fetchCompanies = async () => {
 			try {
-				const response = await axios.get(url + query, {
+				const { data } = await axios.get(url + query, {
 					signal: controller.signal
 				});
 
-				const data = await response.json();
 				if (data.success === false)
 					dispatch(fetchCompaniesFailure(data.message));
 
-				isMounted && dispatch(fetchCompaniesSuccess(response.data));
+				isMounted && dispatch(fetchCompaniesSuccess(data));
 			} catch (err) {
 				console.error(err);
 				dispatch(fetchCompaniesFailure(err));
@@ -52,13 +51,13 @@ function Companies () {
 	}, [rowsPerPage, page]);
 
 
-
-
 	const { length: currTableLen, loading, error, companies, totalNum, currPage, totalPages } = useSelector(state => state.company);
 
 	// const companyObj = useSelector(state => state.company);
 	// console.log(companyObj)
-
+	const handleAdd = () => {
+		navigate('/add-company');
+	}
 	const handleChangePage = async (value) => {
 		if (currPage + value > totalPages || currPage + value <= 0)
 			return;
@@ -79,6 +78,7 @@ function Companies () {
 
 	return (
 		<section>
+			{companies.map(data => (<Company key={data._id} data={data} />))}
 			{
 				loading ?
 					<CircularProgress />
@@ -124,6 +124,7 @@ function Companies () {
 									</TableBody>
 								</Table>
 							</TableContainer>
+							<AddButton onClick={handleAdd} />
 							<Pagination
 								rowsOptions={rowsOptions}
 								rowsPerPage={rowsPerPage}
@@ -133,20 +134,9 @@ function Companies () {
 								onPageChange={handleChangePage}
 								onRowsPerPageChange={handleChangeRowsPerPage}
 							/>
-							{/* <TablePagination
-								// rowsPerPageOptions={[10, 20, 50]}
-								rowsPerPageOptions={rpp}
-								// rowsPerPageOptions={[4, 25, 100]}
-								component="div"
-								count={totalNum}
-								rowsPerPage={rowsPerPage}
-								page={currPage - 1}
-								onPageChange={handleChangePage}
-								onRowsPerPageChange={handleChangeRowsPerPage}
-							/> */}
 						</Paper>
 			}
-		</section>
+		</section >
 	);
 }
 

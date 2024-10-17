@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 // import '../css/job-card.scss';
-import FloatingButtons from './FloatingButtons';
+import FloatingButtons from './IconButton';
 import { BASE_URL } from '../apis/axios';
 
 function JobCard ({ data, editHandler, companyOnly }) {

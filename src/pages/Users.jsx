@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
+import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -8,7 +8,6 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { fetchUsersStart, fetchUsersSuccess, fetchUsersFailure } from "../redux/userSlice";
 import { rowsOptions, usersTableHeads } from "../data/table-heads-data";
 import { ROLES } from '../data/roles';
-import { AddCircleRounded, AddHome, PlusOneRounded } from '@mui/icons-material';
 
 const url = '/api/users';
 

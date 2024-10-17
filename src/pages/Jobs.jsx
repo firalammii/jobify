@@ -8,12 +8,12 @@ import { jobsTableHeads, rowsOptions } from '../data/table-heads-data';
 
 import { useNavigate } from 'react-router-dom';
 import { fetchJobsFailure, fetchJobsStart, fetchJobsSuccess } from '../redux/jobSlice';
-import { JobDatails } from '../components';
+import { AddButton, JobDatails } from '../components';
 import Pagination from '../components/Pagination';
 
 const url = "/api/jobs";
 
-function Jobs () {
+function Jobs (props) {
 	const [modal, setModal] = useState(null);
 	const [page, setPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(rowsOptions[0]);
@@ -21,6 +21,8 @@ function Jobs () {
 	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
 	const navigate = useNavigate();
+
+	console.log(props.location)
 
 	useEffect(() => {
 		dispatch(fetchJobsStart());
@@ -53,6 +55,9 @@ function Jobs () {
 
 	const { jobs, totalNum, length, currPage, totalPages, error, loading } = useSelector(state => state.job);
 
+	const handleAdd = () => {
+		navigate('/add-job');
+	}
 	const handleChangePage = async (value) => {
 		if (currPage + value > totalPages || currPage + value <= 0)
 			return;
@@ -118,6 +123,7 @@ function Jobs () {
 									</TableBody>
 								</Table>
 							</TableContainer>
+							<AddButton onClick={handleAdd} />
 							<Pagination
 								rowsOptions={rowsOptions}
 								rowsPerPage={rowsPerPage}
@@ -127,17 +133,7 @@ function Jobs () {
 								onPageChange={handleChangePage}
 								onRowsPerPageChange={handleChangeRowsPerPage}
 							/>
-							{/* <TablePagination
-								// rowsPerPageOptions={[10, 20, 50]}
-								rowsPerPageOptions={rpp}
-								// rowsPerPageOptions={[4, 25, 100]}
-								component="div"
-								count={totalNum}
-								rowsPerPage={rowsPerPage}
-								page={currPage - 1}
-								onPageChange={handleChangePage}
-								onRowsPerPageChange={handleChangeRowsPerPage}
-							/> */}
+							<AddButton onClick={handleAdd} />
 						</Paper>
 			}
 		</section>

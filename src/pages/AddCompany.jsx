@@ -18,7 +18,7 @@ const initial = {
 	description: ""
 };
 
-function AddCompany ({ tobeEditted }) {
+function AddCompany (props) {
 	const inputRef = useRef("");
 	const [state, setState] = useState(initial);
 	const [door, setDoor] = useState("");
@@ -27,6 +27,8 @@ function AddCompany ({ tobeEditted }) {
 
 	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
+
+	const tobeEditted = false;
 
 	useEffect(() => {
 		if (tobeEditted)
@@ -160,38 +162,6 @@ function AddCompany ({ tobeEditted }) {
 								/>
 							</div>
 
-
-
-							<div className="label-input-con">
-								<label htmlFor="logo" className="label logo"> Select Logo
-									<div className='input logo'>
-										<FileOpenRounded color='primary' fontSize='small' />
-									</div>
-								</label>
-								<input
-									className='input '
-									type='file'
-									name='companyLogo'
-									id='companyLogo'
-									value={state.companyLogo}
-									onChange={handleChange}
-									required
-								/>
-							</div>
-
-							<div className="label-input-con">
-								<label htmlFor="description" className="label"> Company Description</label>
-								<input
-									className='input'
-									type='file'
-									name='description'
-									id='description'
-									value={state.description}
-									onChange={handleChange}
-									required
-								/>
-							</div>
-
 							<div className="label-input-con">
 								<p className="label">Job Address</p>
 								<div className='flex gap-5'>
@@ -282,6 +252,36 @@ function AddCompany ({ tobeEditted }) {
 										/>
 									</div>
 								</div>
+							</div>
+
+							<div className="label-input-con">
+								<label htmlFor="logo" className="label logo"> Select Logo
+									<div className='input logo'>
+										<FileOpenRounded color='primary' fontSize='small' />
+									</div>
+								</label>
+								<input
+									className='input '
+									type='file'
+									name='companyLogo'
+									id='companyLogo'
+									value={state.companyLogo}
+									onChange={handleChange}
+									required
+								/>
+							</div>
+
+							<div className="label-input-con">
+								<label htmlFor="description" className="label"> Company Description</label>
+								<input
+									className='input'
+									type='file'
+									name='description'
+									id='description'
+									value={state.description}
+									onChange={handleChange}
+									required
+								/>
 							</div>
 
 							<div className="label-input-con">

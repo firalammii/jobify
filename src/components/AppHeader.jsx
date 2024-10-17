@@ -67,19 +67,9 @@ export default function AppHeader () {
               Job Posts
             </li>
           </Link>
-          <Link to='/add-job'>
-            <li className='hidden sm:inline text-slate-700 hover:underline text-transform: capitalize'>
-              Add Job
-            </li>
-          </Link>
           <Link to='/companies'>
             <li className='hidden sm:inline text-slate-700 hover:underline text-transform: capitalize'>
               Companies
-            </li>
-          </Link>
-          <Link to='/add-company'>
-            <li className='hidden sm:inline text-slate-700 hover:underline text-transform: capitalize'>
-              Add Company
             </li>
           </Link>
           <Link to='/users'>

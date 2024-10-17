@@ -3,7 +3,7 @@ export { default as Alert } from './Alert';
 export { default as AppHeader } from './AppHeader';
 export { default as Button } from './Button';
 export { default as Filters } from './Filters';
-export { default as FloatingButtons } from './FloatingButtons';
+export { default as IconButton } from './IconButton';
 export { default as Header } from './AppHeader';
 export { default as JobCard } from './JobCard';
 export { default as JobDatails } from './JobDatails';

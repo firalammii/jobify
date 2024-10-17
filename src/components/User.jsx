@@ -7,7 +7,7 @@ import '../css/overlay.scss';
 import { ROLES, roles } from '../data/roles';
 import { useDispatch, useSelector } from 'react-redux';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
-import { deleteUserFailure, deleteUserSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from '../redux/userSlice';
+import { deleteUserFailure, deleteUserStart, deleteUserSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from '../redux/userSlice';
 
 
 const User = ({ user, onClose }) => {
@@ -26,12 +26,11 @@ const User = ({ user, onClose }) => {
 		try {
 			const roles = [...user?.roles, ROLES.super];
 			const { data } = await axios.put(url, { roles });
-			console.log(response);
+			console.log(data);
 			dispatch(updateUserSuccess(data));
 
 		} catch (error) {
-			console.log(error);
-			dispatch(updateUserFailure());
+			dispatch(updateUserFailure(error));
 		}
 		onClose();
 	};
@@ -44,14 +43,11 @@ const User = ({ user, onClose }) => {
 		try {
 			const roles = [...user?.roles, ROLES.admin];
 			const { data } = await axios.put(url, { roles });
-			console.log(response);
 			dispatch(updateUserSuccess(data));
-
 		} catch (error) {
-			console.log(error);
 			dispatch(updateUserFailure());
 		}
-		onClose();
+		onClose(error);
 	};
 
 	const denyAcccess = async () => {
@@ -64,33 +60,23 @@ const User = ({ user, onClose }) => {
 		try {
 			const roles = [ROLES.user];
 			const { data } = await axios.put(url, { roles });
-			console.log(response);
 			dispatch(updateUserSuccess(data));
 		} catch (error) {
-			console.log(error);
-			dispatch(updateUserFailure());
+			dispatch(updateUserFailure(error));
 		}
 		onClose()
 	};
+
 	const removeUser = async () => {
-		dispatch(deleteUserInStart());
+		dispatch(deleteUserStart());
 		try {
 			const { data } = await axios.delete(url);
 			dispatch(deleteUserSuccess(data));
 		} catch (error) {
-			console.log(error);
-			dispatch(deleteUserFailure());
-
+			dispatch(deleteUserFailure(error));
 		}
 		onClose();
 	};
-
-	const buttons = [
-		{ id: 1, label: "Make Super", style: { backgroundColor: 'green', color: 'white' }, onClickFunction: () => makeSuper(), },
-		{ id: 2, label: "Make Admin", style: { backgroundColor: 'blue', color: 'white' }, onClickFunction: makeAdmin, },
-		{ id: 3, label: "Deny Access", style: { backgroundColor: 'gray', color: 'white' }, onClickFunction: denyAcccess, },
-		{ id: 4, label: "Remove User", style: { backgroundColor: 'red', color: 'white' }, onClickFunction: removeUser, },
-	]
 
 	return (
 		<div className='overlay w-full h-full fixed -z-10' onClick={onClose}>
@@ -107,15 +93,10 @@ const User = ({ user, onClose }) => {
 					</div>
 				</div>
 				<div className='flex flex-wrap gap-3 items-center justify-center max-h-12'>
-					{/* {
-						buttons.map(btn => (<Button key={btn.label} type={btn.type} label={btn.label} style={btn.style} onClick={() => btn.onClickFunction()} />))
-					} */}
 					<button onClick={makeSuper} className='min-w-36 h-4/5 rounded-md bg-green-600 text-white whitespace-nowrap '>Make Super</button>
 					<button onClick={makeAdmin} className='min-w-36 h-4/5 rounded-md bg-blue-600 text-white whitespace-nowrap '>Make Admin</button>
 					<button onClick={denyAcccess} className='min-w-36 h-4/5 rounded-md bg-gray-600 text-white whitespace-nowrap '>Deny Access</button>
 					<button onClick={removeUser} className='min-w-36 h-4/5 rounded-md bg-red-600 text-white whitespace-nowrap '>Remove User</button>
-
-
 				</div>
 				<button onClick={onClose} className='text-slate-500 bg-white hover:bg-red-300 hover:text-white rounded-full absolute top-8 right-8' >
 					<CloseRounded fontSize='medium' />
