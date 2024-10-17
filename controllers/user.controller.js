@@ -5,12 +5,27 @@ const _ = require('lodash');
 const UserModel = require('../models/user.model');
 
 const getAllUsers = async (req, res) => {
+	const page = parseInt(req.query.page) || 1;
+	const limit = parseInt(req.query.limit) || 10;
 	try {
-		const users = await UserModel.find();
-		return res.status(200).json(users);
+		const users = await UserModel.find()
+			.sort({ createdAt: -1 })
+			.skip((page - 1) * limit)
+			.limit(limit);
+
+		const totalNum = await UserModel.countDocuments();
+
+		res.json({
+			length: users.length,
+			users,
+			currPage: page,
+			totalPages: Math.ceil(totalNum / limit),
+			totalNum
+		});
+
 	} catch (error) {
 		console.log(error);
-		return res.status(500).json({ message: "ERROR" });
+		return res.status(500).json(error);
 	}
 };
 
@@ -37,10 +52,14 @@ const createUser = async (req, res) => {
 		if (emailTaken)
 			return res.status(400).json({ message: "Email has to be Unique" }); // AI text generation
 		user.roles.push("USER");
-		const encrytedPwd = await bcrypt.hash(user.password, 12);
-		const savedUser = await UserModel.create({ ...user, password: encrytedPwd });
+		if (user.password) {
+			const encrytedPwd = await bcrypt.hash(user.password, 12);
+			user.password = encrytedPwd;
+		}
+		const savedUser = await UserModel.create(user);
+		// const savedUser = await UserModel.create({ ...user, password: encrytedPwd });
 
-		return res.status(201).json(_.pick(savedUser, ["firstName", "lastName", "email", "password", "roles", "avatar", "_id"]));
+		return res.status(201).json(_.pick(savedUser, ["firstName", "lastName", "email", "roles", "avatar", "_id"]));
 	} catch (error) {
 		console.log(error);
 		return res.status(500).json({ message: "Error while Creating" });
@@ -101,8 +120,8 @@ const validateUser = (userObj) => {
 		firstName: Joi.string().min(3).required(),
 		lastName: Joi.string().min(3).required(),
 		email: Joi.string().min(3).required(),
-		password: Joi.string().min(4).required(),
-		roles: Joi.array()
+		password: Joi.string().min(4).optional(),
+		roles: Joi.array().optional()
 	});
 	return userJoiSchema.validate(userObj);
 };

@@ -36,7 +36,7 @@ const handleLogin = async (req, res, next) => {
 			firstName: foundUser.firstName,
 			lastName: foundUser.lastName,
 			avatar: foundUser.avatar,
-			id: foundUser._id,
+			_id: foundUser._id,
 		};
 		res.cookie('jobify_jwt_refresh_tkn', refreshToken, cookieOptions);
 		return res.status(200).json({ ...returnObj });

@@ -16,11 +16,10 @@ const userSchema = mongoose.Schema({
 	},
 	password: {
 		type: String,
-		required: true,
+		// required: true,
 	},
 	roles: [{
 		type: String,
-		default: 'USER'
 	}],
 	refreshToken: {
 		type: String,
