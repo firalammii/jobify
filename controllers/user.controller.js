@@ -20,6 +20,7 @@ const getAllUsers = async (req, res) => {
 			users,
 			currPage: page,
 			totalPages: Math.ceil(totalNum / limit),
+			rowsPerPage: limit,
 			totalNum
 		});
 

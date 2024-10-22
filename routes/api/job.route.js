@@ -1,4 +1,3 @@
-
 const express = require('express');
 const { ROLES_LIST } = require('../../config/roles');
 const { authorize } = require('../../middlewares/authorize');

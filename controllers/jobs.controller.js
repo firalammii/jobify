@@ -7,8 +7,10 @@ const getAllJobs = async (req, res) => {
 	try {
 		const page = parseInt(req.query.page) || 1;
 		const limit = parseInt(req.query.limit) || 10;
+		const createdAt = parseInt(req.query.createdAt) || -1;
 
 		const filters = {
+			company: req.query.company,
 			location: req.query.location,
 			title: req.query.title,
 			jobCategory: req.query.jobCategory,
@@ -20,9 +22,11 @@ const getAllJobs = async (req, res) => {
 			maxYears: req.query.maxYears,
 		};
 
-		const { location, jobCategory, title, jobType, remoteOption, minSalary, maxSalary, minYears, maxYears, } = filters;
+		const { company, location, jobCategory, title, jobType, remoteOption, minSalary, maxSalary, minYears, maxYears, } = filters;
 
 		const searchQuery = {};
+
+		if (company) searchQuery.company = company;
 
 		if (location) searchQuery['location.city'] = { $regex: location, $options: 'i' };
 
@@ -53,7 +57,7 @@ const getAllJobs = async (req, res) => {
 		}
 
 		const jobs = await JobModel.find(searchQuery).populate("company")
-			.sort({ createdAt: -1 })
+			.sort({ createdAt: createdAt })
 			.skip((page - 1) * limit)
 			.limit(limit);
 
@@ -63,6 +67,7 @@ const getAllJobs = async (req, res) => {
 			length: jobs.length,
 			jobs,
 			currPage: page,
+			rowsPerPage: limit,
 			totalPages: Math.ceil(totalNum / limit),
 			totalNum
 		});

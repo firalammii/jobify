@@ -69,12 +69,33 @@ const companiesSchema = mongoose.Schema({
 		type: String,
 	},
 
-	// slug: {
-	// 	type: String,
-	// 	unique: true,
-	// 	slug: 'companyName'
-	// },
+	slug: {
+		type: String,
+		unique: true,
+		slug: 'companyName'
+	},
+},
+	{
+		timestamps: true
+	}
+);
 
+companiesSchema.pre('save', function (next) {
+	this.slug = slugify(this.companyName, {
+		lower: true,
+		strict: true,
+		trim: true
+	});
+
+	const extraInfo = `${this.location.city.toLowerCase().replace(/\s+/g, '-')}`;
+	this.slug = `${this.slug}-${extraInfo}`;
+	next();
+});
+
+companiesSchema.index({
+	companyName: 'text',
+	companyType: 'text',
+	location: 'text',
 });
 
 const CompanyModel = mongoose.model('companies', companiesSchema);

@@ -18,7 +18,8 @@ const getAllCompanies = async (req, res) => {
 			companies,
 			currPage: page,
 			totalPages: Math.ceil(totalNum / limit),
-			totalNum
+			rowsPerPage: limit,
+			totalNum,
 		});
 	} catch (error) {
 		console.error(error);
