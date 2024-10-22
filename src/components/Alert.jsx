@@ -10,7 +10,7 @@ const Alert = ({ returnFunction, success, message }) => {
 
     return (
         <div
-            className='shadow-md w-2/3 h-72 m-w-200 rounded-xl p-10 grid place-items-center gap-5 bg-white'
+            className='shadow-md w-2/3 h-72 m-w-200 rounded-xl p-10 grid place-items-center gap-5 bg-white mx-auto'
             onClick={(e) => e.stopPropagation()}
         >
             <div className={`h-24 w-24 rounded-full font-bold grid place-items-center text-white ${success ? 'bg-green-600' : 'bg-red-600'}`}>

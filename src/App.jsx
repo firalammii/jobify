@@ -1,39 +1,50 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import { About, Home, Profile, SignIn, SignUp, AddCompany, Jobs, AddJob, Users, Unauthorized, Missing, Companies } from './pages';
+import { About, Home, Profile, SignIn, SignUp, AddCompany, AddJob, Unauthorized, Missing, SearchJobs, Company, } from './pages';
 import { RequireAuth, AppHeader, JobDatails, } from './components';
 import { ROLES } from './data/roles';
+import CompanyPage from './pages/CompanyPage';
+import UsersPage from './pages/UsersPage';
+import { JobsPage } from './pages';
+import { LINK_TO } from './data/appData';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppHeader />
-      <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/signin' element={<SignIn />} />
-        <Route path='/about' element={<About />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+    <section className='App'>
+      <BrowserRouter>
 
-        <Route path='/profile' element={<Profile />} />
+        <AppHeader />
 
-        <Route element={<RequireAuth allowedRoles={[ROLES.admin]} />}>
-          <Route path='/companies' element={<Companies />} />
-          <Route path='/add-company' element={<AddCompany />} />
+        <Routes>
+          <Route path={LINK_TO.home} element={<Home />} />
+          <Route path={LINK_TO.about} element={<About />} />
+          <Route path={LINK_TO.signIn} element={<SignIn />} />
+          <Route path={LINK_TO.unauthorized} element={<Unauthorized />} />
+          <Route path={LINK_TO.userProfile} element={<Profile />} />
 
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/add-job" element={<AddJob />} />
-          {/* <Route path="/job-details" element={<JobDatails />} /> */}
+          <Route element={<RequireAuth allowedRoles={[ROLES.admin]} />}>
+            <Route path={LINK_TO.listCompanies} element={<CompanyPage />} />
+            <Route path={LINK_TO.addCompany} element={<AddCompany />} />
+            <Route path={LINK_TO.editCompany} element={<AddCompany />} />
+            <Route path={LINK_TO.viewCompany} element={<Company />} />
+          </Route>
 
-        </Route>
-        <Route element={<RequireAuth allowedRoles={[ROLES.super]} />}>
-          <Route path="/users" element={<Users />} />
-          {/* <Route path="/add-user" element={<Register />} /> */}
-          <Route path="/add-user" element={<SignUp />} />
-          <Route path='/signup' element={<SignUp />} />
+          <Route element={<RequireAuth allowedRoles={[ROLES.admin]} />}>
+            <Route path={LINK_TO.listJobs} element={<JobsPage />} />
+            <Route path={LINK_TO.addJob} element={<AddJob />} />
+            <Route path={LINK_TO.viewJob} element={<JobDatails />} />
+            <Route path={LINK_TO.searchJob} element={<SearchJobs />} />
+          </Route>
 
-        </Route>
-        <Route path='/*' element={<Missing />} />
-      </Routes>
-    </BrowserRouter>
+          <Route element={<RequireAuth allowedRoles={[ROLES.super]} />}>
+            <Route path={LINK_TO.listUsers} element={<UsersPage />} />
+            <Route path={LINK_TO.addUser} element={<SignUp />} />
+          </Route>
+
+          <Route path='/*' element={<Missing />} />
+        </Routes>
+
+      </BrowserRouter>
+    </section>
   );
 }

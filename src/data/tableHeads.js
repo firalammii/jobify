@@ -26,4 +26,5 @@ export const jobsTableHeads = [
     { id: 9, label: "Status", },
 ];
 
-export const rowsOptions = [4, 8, 12];
+export const rowsOptions = [10, 20, 30];
+// export const rowsOptions = [4, 8, 12];

@@ -1,10 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { rowsOptions } from '../data/tableHeads';
 
 const initialState = {
 	jobs: [],
 	totalNum: 0,
 	currPage: 1,
 	length: 0,
+	rowsPerPage: rowsOptions[0],
 	totalPages: 1,
 	error: null,
 	loading: false,
@@ -24,6 +26,7 @@ const jobSlice = createSlice({
 			state.currPage = action.payload.currPage;
 			state.totalPages = action.payload.totalPages;
 			state.length = action.payload.length;
+			state.rowsPerPage = action.payload.rowsPerPage;
 
 			state.loading = false;
 			state.error = null;
@@ -72,6 +75,13 @@ const jobSlice = createSlice({
 			state.error = action.payload;
 			state.loading = false;
 		},
+		pageChange: (state, action) => {
+			state.currPage = state.currPage + action.payload;
+		},
+		rowsPerPageChange: (state, action) => {
+			state.currPage = 1;
+			state.rowsPerPage = action.payload;
+		},
 
 	},
 });
@@ -89,6 +99,8 @@ export const {
 	deleteJobFailure,
 	deleteJobSuccess,
 	deleteJobStart,
+	pageChange,
+	rowsPerPageChange
 } = jobSlice.actions;
 
 export default jobSlice.reducer;

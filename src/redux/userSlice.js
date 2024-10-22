@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { sessionStorageKey } from '../data/roles';
+import { rowsOptions } from '../data/tableHeads';
 
 const initialState = {
 	users: [],
@@ -7,6 +8,7 @@ const initialState = {
 	currPage: 1,
 	length: 0,
 	totalPages: 1,
+	rowsPerPage: rowsOptions[0],
 
 	currUser: null,
 	error: null,
@@ -54,6 +56,7 @@ const userSlice = createSlice({
 				state.totalPages = action.payload.totalPages,
 				state.currPage = action.payload.currPage,
 				state.length = action.payload.length,
+				state.rowsPerPage = action.payload.rowsPerPage,
 				state.loading = false;
 			state.error = null;
 		},

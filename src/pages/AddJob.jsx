@@ -2,10 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-// import '../css/forms.scss';
-import { Alert, Button } from '../components';
-import { currencies, jobCategories, jobTypes, remoteOptions } from '../data/formData';
-
 import {
 	CitySelect,
 	CountrySelect,
@@ -13,8 +9,12 @@ import {
 	LanguageSelect,
 } from "react-country-state-city";
 import "react-country-state-city/dist/react-country-state-city.css";
+
+import '../css/forms.scss';
+import { Alert, Button } from '../components';
+import { currencies, jobCategories, jobTypes, remoteOptions } from '../data/formData';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
-import axios from '../apis/axios';
+import axios from '../api/axios';
 
 const initial = {
 	title: "",
@@ -40,8 +40,8 @@ function AddJob ({ tobeEditted }) {
 	const [alertMsg, setAlertMsg] = useState("");
 	const [success, setSuccess] = useState(false);
 
-	const [countryid, setCountryid] = useState(0);
-	const [stateid, setstateid] = useState(0);
+	const [countryid, setCountryId] = useState(0);
+	const [stateid, setStateId] = useState(0);
 
 
 	const companies = useSelector(state => state?.company?.companies);
@@ -86,8 +86,8 @@ function AddJob ({ tobeEditted }) {
 		const fieldName = e.target.attributes.parentid.value;
 		setState({ ...state, [fieldName]: { ...state[fieldName], [e.target.id]: e.target.value } });
 	};
-	const handleLocation = (fieldName, value) => {
-		setState({ ...state, location: { ...state.location, [fieldName]: value } });
+	const handleLocation = (e, fieldName) => {
+		setState({ ...state, location: { ...state.location, [fieldName]: e.name } });
 	};
 	const save = () => {
 		setState({ ...state, description: JobDesc });
@@ -124,13 +124,13 @@ function AddJob ({ tobeEditted }) {
 	console.log(state)
 
 	return (
-		<div className="AddComp grid h-full">
+		<div className="AddComp gridfullcol grid11row ">
 			{
 				alertMsg ?
 					<Alert returnFunction={setAlertMsg("")} message={alertMsg} success={success} />
 					:
 					JobDesc ?
-						<section className='p-5 shadow-md rounded-md bg-slate-200 h-3/4 w-3/4 justify-self-center overflow-auto fixed'>
+						<section className='p-5 shadow-md rounded-md bg-slate-200 h-3/4 w-3/4 justify-self-center overflow-auto fixed left-48 top-28'>
 							<textarea
 								className='bg-white shadow-md rounded-md resize-none w-full border-none outline-none'
 								cols={100}
@@ -154,13 +154,13 @@ function AddJob ({ tobeEditted }) {
 
 						</section>
 						:
-						<form className="form" onSubmit={handleSubmit} >
+						<form className="form " onSubmit={handleSubmit} >
 							<div className="inputs-con">
 
-								<div className="label-input-con">
+								<div className="label-input-con ">
 									<label htmlFor="jobCategory" className="label"> Job Category</label>
 									<select
-										className='input'
+										className='input '
 										id='jobCategory'
 										value={state.jobCategory}
 										onChange={handleChange}
@@ -236,8 +236,8 @@ function AddJob ({ tobeEditted }) {
 												id='country'
 												parentid="location"
 												onChange={(e) => {
-													setCountryid(e.id);
-													handleLocation("country", e.id);
+													setCountryId(e.id);
+													handleLocation(e, "country");
 												}}
 												placeHolder="Select Country"
 											/>
@@ -250,8 +250,8 @@ function AddJob ({ tobeEditted }) {
 												parentid="location"
 												countryid={countryid}
 												onChange={(e) => {
-													setstateid(e.id);
-													handleLocation("state", e.id);
+													setStateId(e.id);
+													handleLocation(e, "state");
 												}}
 												placeHolder="Select State"
 											/>
@@ -262,7 +262,7 @@ function AddJob ({ tobeEditted }) {
 												id='city'
 												countryid={countryid}
 												stateid={stateid}
-												onChange={() => handleLocation("city", e.id)}
+												onChange={(e) => handleLocation(e, "city")}
 												placeHolder="Select City"
 												parentid="location"
 											/>

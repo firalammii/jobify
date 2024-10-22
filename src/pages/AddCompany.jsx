@@ -1,11 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FileOpenRounded } from "@mui/icons-material";
+
+import {
+	CitySelect,
+	CountrySelect,
+	StateSelect,
+	LanguageSelect,
+} from "react-country-state-city";
+import "react-country-state-city/dist/react-country-state-city.css";
+
 import { Alert } from '../components';
 import { useDispatch, useSelector } from 'react-redux';
 import { companyTypes, countries, } from '../data/formData';
 
 import '../css/forms.scss';
+import '../css/overlay.scss';
+
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { useLocation } from 'react-router-dom';
 
 const initial = {
 	companyType: "",
@@ -18,29 +30,31 @@ const initial = {
 	description: ""
 };
 
-function AddCompany (props) {
+function AddCompany ({ tobeEditted }) {
 	const inputRef = useRef("");
 	const [state, setState] = useState(initial);
 	const [door, setDoor] = useState("");
 	const [alertMsg, setAlertMsg] = useState("");
 	const [success, setSuccess] = useState(false);
 
+	const [countryid, setCountryId] = useState(0);
+	const [stateid, setStateId] = useState(0);
+
 	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
+	const { state: stateFromLocation } = useLocation();
 
-	const tobeEditted = false;
 
 	useEffect(() => {
 		if (tobeEditted)
 			setState(tobeEditted);
+		else if (stateFromLocation)
+			setState(stateFromLocation);
 		else
 			setState(initial);
 	}, []);
 
-	useEffect(() => {
-		// inputRef.current.focus();
-	}, []);
-
+	console.log(state)
 
 	const clearFields = () => {
 		setState(initial);
@@ -57,27 +71,30 @@ function AddCompany (props) {
 		const fieldName = e.target.attributes.parentid.value;
 		setState({ ...state, [fieldName]: { ...state[fieldName], [e.target.id]: e.target.value } });
 	};
+	const handleLocation = (e, fieldName) => {
+		setState({ ...state, location: { ...state.location, [fieldName]: e.name } });
+	};
 
 	const handleSubmit = async (e) => {
-		const { companyType, companyLogo, email, companyName, location, website, telNumber, description, } = state;
 		e.preventDefault();
-		const validInputs = companyType && email && companyName && companyLogo && location && website && telNumber && description;
+		console.log(state);
+		const validInputs = state.companyType && state.email && state.companyName && state.location.city && state.location.country && state.website && state.telNumber.line && state.telNumber.mobile;
 		if (!validInputs) {
 			setAlertMsg("ooops There Empty Field in Form, All fields are Required !!");
 			return;
 		}
 		setAlertMsg("");
-		const formData = new FormData();
-		formData.append("companyType", companyType);
-		formData.append("companyName", companyName);
-		formData.append("companyLogo", companyLogo);
-		formData.append("location", location);
-		formData.append("website", website);
-		formData.append("telNumber", telNumber);
-		formData.append("description", description);
+		// const formData = new FormData();
+		// formData.append("companyType", companyType);
+		// formData.append("companyName", companyName);
+		// formData.append("companyLogo", companyLogo);
+		// formData.append("location", location);
+		// formData.append("website", website);
+		// formData.append("telNumber", telNumber);
+		// formData.append("description", description);
 
 		try {
-			const response = await axios.post('/api/companies', formData, {
+			const response = await axios.post('/api/companies', state, {
 				headers: { 'Content-Type': 'application/json' },
 			});
 			console.log(response);
@@ -93,16 +110,18 @@ function AddCompany (props) {
 	};
 
 	return (
-		<div className="AddComp overflow-auto h-full">
+		<div className="AddComp gridfullcol grid11row max-w-4xl shadow-md p-5 overflow-auto mx-auto">
 			{
 				alertMsg ?
-					<Alert
-						returnFunction={() => setAlertMsg("")}
-						message={alertMsg}
-						success={success}
-					/>
+					<div className='overlay'>
+						<Alert
+							returnFunction={() => setAlertMsg("")}
+							message={alertMsg}
+							success={success}
+						/>
+					</div>
 					:
-					<form className="form p-5" onSubmit={handleSubmit} >
+					<form className="form" onSubmit={handleSubmit} >
 						<div className="inputs-con">
 							<div className="label-input-con">
 								<label htmlFor="companyType" className="label"> Company Type</label>
@@ -140,7 +159,6 @@ function AddCompany (props) {
 									id='website'
 									pattern='https://www.*'
 									placeholder='https://www.*'
-									// placeholder='Web Address'
 									value={state.website}
 									onChange={handleChange}
 									required
@@ -162,59 +180,45 @@ function AddCompany (props) {
 								/>
 							</div>
 
-							<div className="label-input-con">
+							<div className='label-input-con'>
 								<p className="label">Job Address</p>
 								<div className='flex gap-5'>
-									<div>
-										<label htmlFor="city" className="label">City</label>
-										<input
-											className='input small--input'
-											type='text'
-											id='city'
-											placeholder='City'
-											value={state.location.city}
-											parentid="location"
-											onChange={handleObjectChange}
-											required
-										/>
-									</div>
-									<div>
-										<label htmlFor="state" className="label">State</label>
-										<input
-											className='input small--input'
-											type='text'
-											id='state'
-											placeholder='Min Salary'
-											value={state.location.state}
-											parentid="location"
-											onChange={handleObjectChange}
-										/>
-									</div>
-									<div>
+									<div style={{ width: "100%" }}>
 										<label htmlFor="country" className="label">Country</label>
-										<select
-											className='input'
+										<CountrySelect
 											id='country'
-											value={state.location.country}
 											parentid="location"
-											onChange={handleObjectChange}
-											required
-										>
-											<option value={"	"}>Ethiopia</option>
-											{/* {countries.map(country => (<option key={country} value={country}>{country}</option>))} */}
-										</select>
+											onChange={(e) => {
+												setCountryId(e.id);
+												handleLocation(e, "country", e.id);
+											}}
+											placeHolder="Select Country"
+											autoComplete="off"
+										/>
 									</div>
 
 									<div>
-										<label htmlFor="zipCode" className="label">Zip Code</label>
-										<input
-											className='input small--input'
-											type='text'
-											id='zipCode'
-											placeholder='Zip Code'
-											value={state.location.zipCode}
+										<label htmlFor="state" className="label"> State</label>
+										<StateSelect
+											id='state'
 											parentid="location"
-											onChange={handleObjectChange}
+											countryid={countryid}
+											onChange={(e) => {
+												setStateId(e.id);
+												handleLocation(e, "state", e.id);
+											}}
+											placeHolder="Select State"
+										/>
+									</div>
+									<div >
+										<label htmlFor="city" className="label"> City</label>
+										<CitySelect
+											id='city'
+											countryid={countryid}
+											stateid={stateid}
+											onChange={(e) => handleLocation(e, "city", e.id)}
+											placeHolder="Select City"
+											parentid="location"
 										/>
 									</div>
 								</div>
@@ -231,7 +235,7 @@ function AddCompany (props) {
 											id='mobile'
 											placeholder='phone number'
 											parentid="telNumber"
-											pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+											// pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
 											value={state.telNumber?.mobile}
 											onChange={handleObjectChange}
 											required
@@ -244,7 +248,7 @@ function AddCompany (props) {
 											className='input small--input'
 											type='tel'
 											id='line'
-											pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+											// pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
 											placeholder='phone number'
 											parentid="telNumber"
 											value={state.telNumber?.line}
@@ -254,7 +258,7 @@ function AddCompany (props) {
 								</div>
 							</div>
 
-							<div className="label-input-con">
+							{/* <div className="label-input-con">
 								<label htmlFor="logo" className="label logo"> Select Logo
 									<div className='input logo'>
 										<FileOpenRounded color='primary' fontSize='small' />
@@ -269,8 +273,8 @@ function AddCompany (props) {
 									onChange={handleChange}
 									required
 								/>
-							</div>
-
+							</div> */}
+							{/*
 							<div className="label-input-con">
 								<label htmlFor="description" className="label"> Company Description</label>
 								<input
@@ -282,7 +286,10 @@ function AddCompany (props) {
 									onChange={handleChange}
 									required
 								/>
-							</div>
+
+							</div> */}
+
+
 
 							<div className="label-input-con">
 								<input
@@ -291,6 +298,16 @@ function AddCompany (props) {
 									value={tobeEditted ? "Update Company" : "Add Company"}
 								/>
 							</div>
+							{
+								tobeEditted &&
+								<div className="label-input-con">
+									<input
+										className='input form-btn cancel-btn'
+										type='submit'
+										value="Cancel Update"
+									/>
+								</div>
+							}
 
 						</div>
 					</form>

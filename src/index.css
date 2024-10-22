@@ -1,4 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 :root {
     --blue: #1e90ff;
     --app-blue: #0E45B7;
@@ -41,12 +46,49 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: rgb(241, 245, 241);
+    height: 100vh;
+        width: 100vw;
 }
 
 ::-webkit-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
     display: none;
+}
+.App {
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(12, 1fr);
+}
+
+.gridfullcol {
+    grid-column: 1/-1;
+}
+
+.grid9col {
+    grid-column: 4/-1;
+}
+
+.grid3col {
+    grid-column: 1/4;
+}
+
+.grid11row {
+    grid-row: 2/-1;
+}
+
+.gridcentercol {
+    grid-column: 4/-3;
+}
+
+.gridcenterrow {
+    grid-row: 3/-2;
+}
+
+.border {
+    border: 2px solid blue;
 }
 @tailwind base;
 @tailwind components;

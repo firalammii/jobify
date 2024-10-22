@@ -1,143 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import { CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material';
-import { ROLES } from '../data/roles';
+import React, { useEffect, useState } from 'react';
+import { rowsOptions } from '../data/tableHeads';
 import { useDispatch, useSelector } from 'react-redux';
+import { CircularProgress } from '@mui/material';
+
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { useLocation, useNavigate } from 'react-router-dom';
+import TableJobs from '../components/TableJobs';
+import { fetchJobsFailure, fetchJobsStart, fetchJobsSuccess, pageChange, rowsPerPageChange } from '../redux/jobSlice';
 
-import { jobsTableHeads, rowsOptions } from '../data/table-heads-data';
+import { jobURL } from '../api/urls';
+import { JobDatails } from '../components';
+import { LINK_TO } from '../data/appData';
 
-import { useNavigate } from 'react-router-dom';
-import { fetchJobsFailure, fetchJobsStart, fetchJobsSuccess } from '../redux/jobSlice';
-import { AddButton, JobDatails } from '../components';
-import Pagination from '../components/Pagination';
-
-const url = "/api/jobs";
-
-function Jobs (props) {
-	const [modal, setModal] = useState(null);
-	const [page, setPage] = useState(1);
-	const [rowsPerPage, setRowsPerPage] = useState(rowsOptions[0]);
+const JobsPage = () => {
 
 	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
 	const navigate = useNavigate();
 
-	console.log(props.location)
+	const { jobs, totalNum, length, currPage, rowsPerPage, totalPages, error, loading } = useSelector(state => state.job);
 
-	useEffect(() => {
+	const fetchJobs = async (page, limit) => {
 		dispatch(fetchJobsStart());
-		const query = `?page=${page}&limit=${rowsPerPage}`;
-		let isMounted = true;
-		const controller = new AbortController();
-		const fetchJobs = async () => {
-
-			try {
-				const response = await axios.get(url + query, {
-					signal: controller.signal
-				});
-
-				isMounted && dispatch(fetchJobsSuccess(response.data));
-			} catch (err) {
-				console.error(err);
-				dispatch(fetchJobsFailure(err));
-				navigate({ from: location, replace: true });
-
-			}
-		};
-
-		fetchJobs();
-
-		return () => {
-			isMounted = false;
-			controller.abort();
-		};
-	}, [page, rowsPerPage]);
-
-	const { jobs, totalNum, length, currPage, totalPages, error, loading } = useSelector(state => state.job);
-
-	const handleAdd = () => {
-		navigate('/add-job');
-	}
-	const handleChangePage = async (value) => {
-		if (currPage + value > totalPages || currPage + value <= 0)
-			return;
-		setPage(prev => prev + value);
+		const query = `?page=${page}&limit=${limit}`;
+		//query add companyId
+		try {
+			const { data } = await axios.get(jobURL + query);
+			dispatch(fetchJobsSuccess(data));
+		} catch (error) {
+			console.error(error);
+			dispatch(fetchJobsFailure(error));
+			// navigate({ from: location, replace: true });
+		}
 	};
 
-	const handleChangeRowsPerPage = (e) => {
-		setPage(1);
-		setRowsPerPage(e.target.value);
+	const handleAdd = () => {
+		navigate(LINK_TO.addJob);
+	};
+
+	const handleChangePage = async (value) => {
+		let page = 1;
+		if (currPage + value > totalPages)
+			page = 1;
+		else if (currPage + value <= 0)
+			page = totalPages;
+		else page = currPage + value;
+		await fetchJobs(page, rowsPerPage);
+	};
+
+	const handleChangeRowsPerPage = async (event) => {
+		event.preventDefault();
+		await fetchJobs(1, event.target.value);
 	};
 
 	const selectModal = (item) => {
-		setModal(item);
-	};
-	const back = () => {
-		setModal(null);
+		navigate(LINK_TO.viewJob, { state: item })
 	};
 
 	return (
-		<section>
+		<div className='gridfullcol grid11row'>
 			{
 				loading ?
 					<CircularProgress />
 					:
-					modal ?
-						<JobDatails data={modal} back={back} />
-						:
-						<Paper sx={{ width: '100%', overflow: 'hidden', }}>
-							<TableContainer
-								sx={{ height: "calc(100vh - 140px)", }}
-							>
-								<Table stickyHeader aria-label="sticky table">
-									<TableHead>
-										<TableRow>
-											{jobsTableHeads?.map((column) => (<TableCell key={column.id}> {column.label}</TableCell>))}
-										</TableRow>
-									</TableHead>
-									<TableBody style={{ overflow: "auto" }} >
-										{
-											jobs?.map((body, index) => {
-												return (
-													<TableRow
-														key={body?._id}
-														hover
-														role="checkbox"
-														tabIndex={-1}
-														style={{ cursor: "pointer" }}
-														onClick={() => selectModal(body)}
-													>
-														<TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
-														<TableCell>{body?.title}</TableCell>
-														<TableCell>{body?.jobType}</TableCell>
-														<TableCell>{body.salary?.minSalary} - {body?.salary?.maxSalary} {body.salary?.currency}</TableCell>
-														<TableCell>{body.experience?.minYears} - {body?.experience?.maxYears} Years</TableCell>
-														{/* <TableCell>{body?.remoteOption}</TableCell> */}
-														<TableCell>{body?.location?.city}, {body?.location?.country} </TableCell>
-														<TableCell>{new Date(body?.postingDate).toLocaleDateString()}</TableCell>
-														<TableCell>{body?.status}</TableCell>
-													</TableRow>
-												);
-											})
-										}
-									</TableBody>
-								</Table>
-							</TableContainer>
-							<AddButton onClick={handleAdd} />
-							<Pagination
-								rowsOptions={rowsOptions}
-								rowsPerPage={rowsPerPage}
-								totalNum={totalNum}
-								totalPages={totalPages}
-								currPage={currPage}
-								onPageChange={handleChangePage}
-								onRowsPerPageChange={handleChangeRowsPerPage}
+					<section className='w-full h-full relative'>
+						<header className='flex justify-between text-slate-700 capitalize bg-slate-100 shadow-md p-2 text-sm font-bold'  >
+							<h1 className='uppercase '>Jobs table</h1>
+							<span>total: {totalNum} Jobs</span>
+						</header>
+						<section className='bg-white pb-14'>
+							<TableJobs
+								handleAdd={handleAdd}
+								handleChangePage={handleChangePage}
+								handleChangeRowsPerPage={handleChangeRowsPerPage}
+								selectModal={selectModal}
 							/>
-							<AddButton onClick={handleAdd} />
-						</Paper>
+						</section>
+					</section>
 			}
-		</section>
+		</div>
 	);
-}
+};
 
-export default Jobs;
+export default JobsPage;

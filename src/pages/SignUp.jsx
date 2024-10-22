@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { VisibilityOffRounded, VisibilityRounded } from "@mui/icons-material";
 
-import OAuth from '../components/OAuth';
+import OAuth from '../../../../OAuth';
 import { ROLES } from '../data/roles';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 const NAME_REGEX = /^[a-z ]{2,24}$/i;
@@ -80,7 +80,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className='p-10 pb-40 max-w-xl mx-auto shadow-md rounded-lg'>
+    <div className='gridcentercol gridcenterrow p-10 pb-40 max-w-xl shadow-md rounded-lg'>
       <h1 className='text-3xl text-center font-semibold my-7'>Add User</h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <input

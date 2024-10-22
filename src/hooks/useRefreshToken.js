@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import axios from '../apis/axios';
+import axios from '../api/axios';
 import { signInStart, signInSuccess } from '../redux/userSlice';
 
 const useRefreshToken = () => {

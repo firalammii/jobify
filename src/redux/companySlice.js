@@ -7,6 +7,7 @@ const initialState = {
 	rowsPerPage: 10,
 	totalPages: 0,
 	length: 0,
+	modalCompany: null,
 
 
 
@@ -27,6 +28,7 @@ const jobSlice = createSlice({
 			state.totalPages = action.payload.totalPages;
 			state.companies = action.payload.companies;
 			state.length = action.payload.length;
+			state.rowsPerPage = action.payload.rowsPerPage;
 
 			state.loading = false;
 			state.error = null;
@@ -66,13 +68,19 @@ const jobSlice = createSlice({
 			state.loading = true;
 		},
 		deleteCompanySuccess: (state, action) => {
-			state.companies = [...Companys.filter(item => item._id !== action.payload._id)];
+			state.companies = [...state.companies.filter(item => item._id !== action.payload._id)];
 			state.loading = false;
 			state.error = null;
 		},
 		deleteCompanyFailure: (state, action) => {
 			state.error = action.payload;
 			state.loading = false;
+		},
+		setModal: () => (state, action) => {
+			state.modalCompany = action.payload;
+		},
+		clearModal: () => (state) => {
+			state.modalCompany = null;
 		},
 
 	},
@@ -91,6 +99,8 @@ export const {
 	deleteCompanyFailure,
 	deleteCompanySuccess,
 	deleteCompanyStart,
+	clearModal,
+	setModal
 } = jobSlice.actions;
 
 export default jobSlice.reducer;

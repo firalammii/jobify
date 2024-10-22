@@ -131,7 +131,7 @@ export default function Profile() {
   };
 
   return (
-    <div className='p-3 max-w-lg mx-auto'>
+    <div className='gridcentercol gridcenterrow p-3 flex flex-col gap-4 max-w-xl'>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <div className='flex gap-4 items-end'>
           <input

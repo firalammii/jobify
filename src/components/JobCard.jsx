@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // import '../css/job-card.scss';
 import FloatingButtons from './IconButton';
-import { BASE_URL } from '../apis/axios';
+import { BASE_URL } from '../api/axios';
 
 function JobCard ({ data, editHandler, companyOnly }) {
 	const deleteHandler = () => {

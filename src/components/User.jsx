@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CloseRounded } from '@mui/icons-material';
 
 import Button from './Button';
@@ -8,14 +8,16 @@ import { ROLES, roles } from '../data/roles';
 import { useDispatch, useSelector } from 'react-redux';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { deleteUserFailure, deleteUserStart, deleteUserSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from '../redux/userSlice';
+import CloseButton from './CloseButton';
+import Alert from './Alert';
+import { userURL } from '../api/urls';
 
-
-const User = ({ user, onClose }) => {
-
-	const url = `/api/users/${user?._id}`;
+const User = ({ user, back }) => {
+	const [alertMsg, setAlertMsg] = useState("");
+	const url = `${userURL}/${user?._id}`;
 	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
-
+	let success = false;
 	const { currUser, users } = useSelector(state => state.user);
 
 	const makeSuper = async () => {
@@ -28,11 +30,13 @@ const User = ({ user, onClose }) => {
 			const { data } = await axios.put(url, { roles });
 			console.log(data);
 			dispatch(updateUserSuccess(data));
-
+			setAlertMsg("Operation successfull");
+			success = true;
 		} catch (error) {
 			dispatch(updateUserFailure(error));
+			setAlertMsg(error.message);
+			success = false;
 		}
-		onClose();
 	};
 	const makeAdmin = async () => {
 		const alreadyAdmin = user?.roles?.includes(ROLES.admin);
@@ -44,10 +48,14 @@ const User = ({ user, onClose }) => {
 			const roles = [...user?.roles, ROLES.admin];
 			const { data } = await axios.put(url, { roles });
 			dispatch(updateUserSuccess(data));
+			setAlertMsg("Operation successfull");
+			setuser(data);
+			success = true;
 		} catch (error) {
 			dispatch(updateUserFailure());
+			setAlertMsg(error.message);
+			success = false;
 		}
-		onClose(error);
 	};
 
 	const denyAcccess = async () => {
@@ -61,10 +69,13 @@ const User = ({ user, onClose }) => {
 			const roles = [ROLES.user];
 			const { data } = await axios.put(url, { roles });
 			dispatch(updateUserSuccess(data));
+			setAlertMsg("Operation successfull");
+			success = true;
 		} catch (error) {
 			dispatch(updateUserFailure(error));
+			setAlertMsg(error.message);
+			success = false;
 		}
-		onClose()
 	};
 
 	const removeUser = async () => {
@@ -72,15 +83,22 @@ const User = ({ user, onClose }) => {
 		try {
 			const { data } = await axios.delete(url);
 			dispatch(deleteUserSuccess(data));
+			setAlertMsg("Operation successfull");
+			success = true;
 		} catch (error) {
 			dispatch(deleteUserFailure(error));
+			setAlertMsg(error.message);
+			success = false;
 		}
-		onClose();
+		back()
 	};
 
 	return (
-		<div className='overlay w-full h-full fixed -z-10' onClick={onClose}>
-			<div className='p-8 grid shadow-sm w-2/3 h-1/2 bg-white my-auto mx-auto  rounded-xl relative' onClick={e => e.stopPropagation()}>
+		<div className='overlay w-full h-full fixed' onClick={back}>
+			{
+				alertMsg && <Alert message={alertMsg} success={success} returnFunction={() => { setAlertMsg(''); back(); }} />
+			}
+			<div className='p-8 grid shadow-sm w-2/3 h-1/2 bg-white my-auto mx-auto  rounded-xl relative' onClick={(e) => e.stopPropagation()}>
 				<div className='flex gap-7 items-center'>
 					<img
 						className='rounded-full h-24 w-24 object-cover'
@@ -98,9 +116,10 @@ const User = ({ user, onClose }) => {
 					<button onClick={denyAcccess} className='min-w-36 h-4/5 rounded-md bg-gray-600 text-white whitespace-nowrap '>Deny Access</button>
 					<button onClick={removeUser} className='min-w-36 h-4/5 rounded-md bg-red-600 text-white whitespace-nowrap '>Remove User</button>
 				</div>
-				<button onClick={onClose} className='text-slate-500 bg-white hover:bg-red-300 hover:text-white rounded-full absolute top-8 right-8' >
-					<CloseRounded fontSize='medium' />
-				</button>
+				<div className='absolute top-8 right-8'>
+					<CloseButton onClose={back} />
+				</div>
+
 			</div>
 		</div >
 	);
