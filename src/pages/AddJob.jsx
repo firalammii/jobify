@@ -1,455 +1,495 @@
 import React, { useEffect, useRef } from 'react';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
-import {
-	CitySelect,
-	CountrySelect,
-	StateSelect,
-	LanguageSelect,
-} from "react-country-state-city";
-import "react-country-state-city/dist/react-country-state-city.css";
+import { useLocation } from 'react-router-dom';
+import { CircularProgress } from '@mui/material'
 
 import '../css/forms.scss';
 import { Alert, Button } from '../components';
 import { currencies, jobCategories, jobTypes, remoteOptions } from '../data/formData';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
-import axios from '../api/axios';
+import { aiURL, citiesURL, countriesURL, jobURL, statesURL } from '../api/urls';
+import { createJobFailure, createJobStart, createJobSuccess } from '../redux/jobSlice';
 
 const initial = {
 	title: "",
 	jobCategory: "",
-	company: "",
+	company: { id: "", companyName: "" },
 	salary: { currency: "USD", minSalary: "", maxSalary: "" },
 	location: { city: "", state: "", country: "", zipCode: "" },
 	jobType: "",
 	remoteOption: "",
 	applyURL: "",
 	experience: { minYears: "", maxYears: "" },
-	skills: [],
 	postingDate: "",
 	applicationDeadline: "",
 	description: "",
 };
 
-function AddJob ({ tobeEditted }) {
+function AddJob () {
 	const inputRef = useRef("");
+	const [jobDesc, setJobDesc] = useState({ visible: false, description: "" });
+	const [formData, setFormData] = useState(initial);
+	const [alert, setAlert] = useState({ visible: false, success: false, message: "" });
 
-	const [state, setState] = useState(initial);
-	const [JobDesc, setJobDesc] = useState("");
-	const [alertMsg, setAlertMsg] = useState("");
-	const [success, setSuccess] = useState(false);
+	const [companyId, setCompanyId] = useState("");
 
-	const [countryid, setCountryId] = useState(0);
-	const [stateid, setStateId] = useState(0);
+	const [countries, setCountries] = useState([]);
+	const [states, setStates] = useState([]);
+	const [cities, setCities] = useState([]);
+	const [country, setCountry] = useState("");
+	const [state, setState] = useState("");
+	const [city, setCity] = useState("");
 
 
-	const companies = useSelector(state => state?.company?.companies);
+	const { companies, loading } = useSelector(state => state?.company);
 	// console.log(companies)
 	const dispatch = useDispatch();
-	// const axios = useAxiosPrivate();
+	const { state: tobeEditted } = useLocation();
+	const axios = useAxiosPrivate();
+
+	const clearFields = () => setFormData(initial);
+	const closeAlert = () => setAlert({ ...alert, visible: false });
+	const openAlert = (success, msg) => setAlert({ visible: true, success: success, message: msg });
+
+	const generateJobDesc = async () => {
+		setJobDesc({ description: "", visible: false });
+		if (!inValidInputs()) {
+			const { data } = await axios.post(aiURL, formData);
+			setJobDesc({ visible: true, description: data });
+		}
+	};
 
 	useEffect(() => {
 		if (tobeEditted)
-			setState(tobeEditted);
-		else
-			setState(initial);
+			setFormData(tobeEditted);
+		const getAllCountries = async () => {
+			const { data } = await axios.get(countriesURL);
+			if (!data.error)
+				setCountries(data.data);
+			else openAlert(false, data.data.msg);
+		};
+		getAllCountries();
 	}, []);
 
+	useEffect(() => {
+		const getStates = async () => {
+			const { data } = await axios.post(statesURL,
+				JSON.stringify({ country })
+			);
+			if (!data.data.error)
+				setStates(data.data.states);
+			else openAlert(false, data.data.msg);
+		};
+		if (country)
+			getStates();
+	}, [country]);
 
 	useEffect(() => {
-		if (state.company && state.title && state.applyURL && state.experience) {
-			generateJoDesc();
-		}
+		const getCities = async () => {
+			const { data } = await axios.post(citiesURL,
+				JSON.stringify({ country: country, state: state })
+			);
+			if (!data.error)
+				setCities(data.data);
+			else openAlert(false, data.msg);;
+		};
+		if (state && country)
+			getCities();
 	}, [state]);
 
-	const generateJoDesc = async () => {
-		const prompt = {
-			companyName: state.company?.companyName,
-			title: state.title,
-			website: state.company?.website,
-			applyURL: state.applyURL
-		};
-		const result = await axios.post('/api/gemini', prompt);
-		setJobDesc(result.data);
-		console.log(result.data);
+	useEffect(() => {
+		if (country && state && city) setFormData({ ...formData, location: { country, state, city } });
+	}, [country, state, city]);
+
+	useEffect(() => {
+		if (companyId) {
+			const companyObj = companies.find(comp => comp._id === companyId);
+			setFormData({ ...formData, company: { id: companyId, companyName: companyObj?.companyName } });
+		}
+	}, [companyId]);
+
+	const inValidInputs = (final = false) => {
+		console.log(formData);
+		if (
+			!formData.title ||
+			!formData.jobType ||
+			!formData.company ||
+			!formData.jobCategory ||
+			!formData.salary ||
+			!formData.remoteOption ||
+			!formData.postingDate ||
+			!formData.applicationDeadline
+			// (final ? !formData.description : true)
+		) {
+			openAlert(false, "ooops Ther");
+			// openAlert(false, "ooops There are Empty Fields in Form, All fields are Required !!");
+			return true;
+		}
+		return false;
 	};
 
-	const clearFields = () => {
-		setState(initial);
+	const handleChange = (event) => {
+		const fieldName = event.target.attributes.parentid.value;
+		if (fieldName)
+			setFormData({ ...formData, [fieldName]: { ...formData[fieldName], [event.target.id]: event.target.value } });
+		else if (event.target.type === "file")
+			handleFileUpload(event);
+		else
+			setFormData({ ...formData, [event.target.id]: event.target.value });
 	};
 
-	const handleChange = (e) => {
-		setState({ ...state, [e.target.id]: e.target.value });
-	};
-	const handleObjectChange = (e) => {
-		const fieldName = e.target.attributes.parentid.value;
-		setState({ ...state, [fieldName]: { ...state[fieldName], [e.target.id]: e.target.value } });
-	};
-	const handleLocation = (e, fieldName) => {
-		setState({ ...state, location: { ...state.location, [fieldName]: e.name } });
-	};
 	const save = () => {
-		setState({ ...state, description: JobDesc });
-		setJobDesc("");
+		setJobDesc({ ...jobDesc, visible: false });
+		setState({ ...formData, description: jobDesc.description });
 	};
 
 	const handleSubmit = async (e) => {
+		console.log(formData)
 		e.preventDefault();
-		const { title, jobType, company, jobCategory, salary, skills, remoteOption, posting_date, applicationDeadline, description } = state;
-		const validInputs = !title || !jobType || !company || !jobCategory || !salary || !posting_date || !applicationDeadline || !description;
-		if (!validInputs) {
-			setAlertMsg("ooops There is Empty Field in Form, All fields are Required !!");
-			return;
-		}
-		setAlertMsg("");
-
-		state.skills = skills.split(",");
-		try {
-			// const response = await axios.post(`${BASE_URL}/jobs`, state, {
-			// 	headers: { 'Content-Type': 'application/json' },
-			// });
-			// console.log(response);
-			// dispatch(createCompany(state, auth?.accessToken));
-			setSuccess(true);
-			setAlertMsg("Job is Posted Successfully !!");
-			clearFields();
-		} catch (err) {
-			console.log(err);
-			setSuccess(false);
-			setAlertMsg('Sorry !! Posting the Job is Failed, Try Again Later !');
+		if (inValidInputs(true)) {
+			try {
+				dispatch(createJobStart());
+				const { data } = await axios.post(jobURL, formData);
+				dispatch(createJobSuccess(data));
+				openAlert(true, "Job is Posted Successfully !!");
+				clearFields();
+			} catch (error) {
+				console.error(error);
+				const msg = error.response?.data?.message;
+				dispatch(createJobFailure(msg ? msg : error.message));
+				openAlert(false, msg ? msg : error.message);
+			}
 		}
 	};
 
-	console.log(state)
-
 	return (
-		<div className="AddComp gridfullcol grid11row ">
+		loading ?
+			<p>loading</p>
+			:
+			<section className="gridfullcol grid11row w-full h-full overflow-auto  shadow-md rounded-md p-5 flex m-auto">
 			{
-				alertMsg ?
-					<Alert returnFunction={setAlertMsg("")} message={alertMsg} success={success} />
+					alert.visible ?
+						<Alert
+							returnFunction={closeAlert}
+							message={alert.message}
+							success={alert.success}
+							style={{ width: "100%", marginTop: 100 }}
+						/>
 					:
-					JobDesc ?
-						<section className='p-5 shadow-md rounded-md bg-slate-200 h-3/4 w-3/4 justify-self-center overflow-auto fixed left-48 top-28'>
-							<textarea
-								className='bg-white shadow-md rounded-md resize-none w-full border-none outline-none'
-								cols={100}
-								rows={20}
-								value={JobDesc}
-								onChange={(e) => setJobDesc(e.target.value)}
-							>
-							</textarea>
-							<div className='flex gap-5 justify-end mt-3' >
-								<Button
-									label="Regenerate"
-									style={{ backgroundColor: "blue", color: "white" }}
-									onClickFunction={generateJoDesc}
-								/>
-								<Button
-									label="Save"
-									style={{ backgroundColor: "green", color: "white" }}
-									onClickFunction={save}
-								/>
-							</div>
-
-						</section>
-						:
-						<form className="form " onSubmit={handleSubmit} >
-							<div className="inputs-con">
-
-								<div className="label-input-con ">
-									<label htmlFor="jobCategory" className="label"> Job Category</label>
-									<select
-										className='input '
-										id='jobCategory'
-										value={state.jobCategory}
-										onChange={handleChange}
+						jobDesc.visible && !jobDesc.description ?
+							<CircularProgress /> :
+							jobDesc.visible && jobDesc.description ?
+								<section className='p-5 shadow-md rounded-md bg-slate-200 h-3/4 w-3/4 justify-self-center overflow-auto fixed m-auto'>
+									<textarea
+										className='bg-white shadow-md rounded-md resize-none w-full border-none outline-none'
+										cols={100}
+										rows={20}
+										value={jobDesc.description}
+										onChange={(e) => setJobDesc({ ...jobDesc, description: e.target.value })}
 									>
-										{
-											jobCategories.map(jobCat => (<option key={jobCat.label} value={jobCat.value}>{jobCat.label}</option>))
-										}
-									</select>
-								</div>
+									</textarea>
+									<div className='flex gap-5 justify-end mt-3' >
+										<Button
+											label="Back"
+											style={{ backgroundColor: "gray", color: "white" }}
+											onClick={() => setJobDesc({ visible: false, description: "" })}
+										/>
+										<Button
+											label="Regenerate"
+											style={{ backgroundColor: "blue", color: "white" }}
+											onClick={generateJobDesc}
+										/>
+										<Button
+											label="Save"
+											style={{ backgroundColor: "green", color: "white" }}
+											onClick={save}
+										/>
 
-								<div className="label-input-con">
-									<label htmlFor="company" className="label"> Company Name</label>
-									<select
-										className='input'
-										id='company'
-										value={state.company}
-										onChange={handleChange}
-									>
-										<option value={""}>none</option>
-										{
-											companies?.map(comp => (<option key={comp?._id} value={comp}>{comp?.companyName}</option>))
-										}
-									</select>
-								</div>
-								<div className="label-input-con">
-									<label htmlFor="title" className="label"> Job Title</label>
-									<input
-										className='input'
-										type='text'
-										id='title'
-										placeholder='Job Title'
-										value={state.title}
-										onChange={handleChange}
-										required
-										autoComplete='on'
-									/>
-								</div>
-
-								<div className="label-input-con">
-									<label htmlFor="jobType" className="label"> Job Type</label>
-									<select
-										className='input'
-										id='jobType'
-										value={state.jobType}
-										onChange={handleChange}
-									>
-										{
-											jobTypes.map(type => (<option key={type.label} value={type.value}>{type.label}</option>))
-										}
-									</select>
-								</div>
-
-								<div className="label-input-con">
-									<label htmlFor="remoteOption" className="label"> Remote Option</label>
-									<select
-										className='input'
-										id='remoteOption'
-										value={state.remoteOption}
-										onChange={handleChange}
-									>
-										{
-											remoteOptions.map(remoteOption => (<option key={remoteOption.label} value={remoteOption.value}>{remoteOption.label}</option>))
-										}
-									</select>
-								</div>
-
-								<div className='label-input-con'>
-									<p className="label">Job Address</p>
-									<div className='flex gap-5'>
-										<div style={{ width: "100%" }}>
-											<label htmlFor="country" className="label">Country</label>
-											<CountrySelect
-												id='country'
-												parentid="location"
-												onChange={(e) => {
-													setCountryId(e.id);
-													handleLocation(e, "country");
-												}}
-												placeHolder="Select Country"
-											/>
-										</div>
-
-										<div>
-											<label htmlFor="state" className="label"> State</label>
-											<StateSelect
-												id='state'
-												parentid="location"
-												countryid={countryid}
-												onChange={(e) => {
-													setStateId(e.id);
-													handleLocation(e, "state");
-												}}
-												placeHolder="Select State"
-											/>
-										</div>
-										<div >
-											<label htmlFor="city" className="label"> City</label>
-											<CitySelect
-												id='city'
-												countryid={countryid}
-												stateid={stateid}
-												onChange={(e) => handleLocation(e, "city")}
-												placeHolder="Select City"
-												parentid="location"
-											/>
-										</div>
 									</div>
-								</div>
 
-								<div className="label-input-con">
-									<label htmlFor="postingDate" className="label"> Posting Date</label>
-									<input
-										className='input'
-										type='date'
-										id='postingDate'
-										placeholder='Posting Date'
-										value={state.postingDate}
-										onChange={handleChange}
-										required
-										autoComplete='on'
-									/>
-								</div>
-								<div className="label-input-con">
-									<label htmlFor="applicationDeadline" className="label">Application Deadline Date</label>
-									<input
-										className='input'
-										type='date'
-										id='applicationDeadline'
-										placeholder='Deadline Date'
-										value={state.applicationDeadline}
-										onChange={handleChange}
-										required
-										autoComplete='on'
-									/>
-								</div>
+								</section>
+								:
+								<form className="form " onSubmit={handleSubmit} >
+									<div className="inputs-con">
 
-								<div className="label-input-con">
-									<label htmlFor="applyURL" className="label"> Application URL <span style={{ textTransform: "lowercase" }} >https:// URL</span></label>
-									<input
-										className='input'
-										type='url'
-										id='applyURL'
-										placeholder='https://example.com'
-										pattern="https://.*"
-										// size="100"
-										value={state.applyURL}
-										onChange={handleChange}
-										required
-										autoComplete='on'
-									/>
-								</div>
-								{/* <div className="label-input-con">
-									<label htmlFor="skills" className="label"> Preferred Skills </label>
-									<input
-										className='input'
-										type='text'
-										id='skills'
-										placeholder='eg. Communication, Motivation'
-										value={state.skills}
-										onChange={handleChange}
-										required
-										autoComplete='on'
-									/>
-								</div> */}
-
-								<div className="label-input-con">
-									<p className="label">Experience Range in Years</p>
-									<div className='flex gap-5'>
-										<div>
-											<label htmlFor="minYears" className="label">Min Years</label>
-											<input
-												className='input small--input'
-												type='number'
-												id='minYears'
-												parentid="experience"
-												placeholder='Min Years'
-												value={state.experience.minYears}
-												onChange={handleObjectChange}
-												required
-											/>
-										</div>
-										<div >
-											<label htmlFor="maxYears" className="label">Max Years</label>
-											<input
-												className='input small--input'
-												type='number'
-												id='maxYears'
-												parentid="experience"
-												placeholder='Max Years'
-												value={state.experience.maxYears}
-												onChange={handleObjectChange}
-												required
-											/>
-										</div>
-									</div>
-								</div>
-
-								{/* <div className="label-input-con ">
-												<label htmlFor="skills" className="label"> Preferred Skills</label>
-												<textarea
-													className='input textarea'
-													type='text'
-													id='skills'
-													cols={50}
-													rows={4}
-													value={state.skills}
-													onChange={handleChange}
-													required
-													autoComplete='on'
-												/>
-											</div> */}
-
-
-								<div className="label-input-con">
-									<p className="label">Salary Range Annually</p>
-									<div className='flex gap-5'>
-										<div>
-											<label htmlFor="currency" className="label">Currency</label>
+										<div className="label-input-con ">
+											<label htmlFor="jobCategory" className="label"> Job Category</label>
 											<select
-												className='input'
-												id='currency'
-												value={state.salary.currency}
-												parentid="salary"
-												onChange={handleObjectChange}
+												className='input '
+												id='jobCategory'
+												parentid=""
+												value={formData.jobCategory}
+												onChange={handleChange}
 											>
-												{currencies.map(currency => (<option key={currency} value={currency}>{currency}</option>))}
+												{
+													jobCategories.map(jobCat => (<option key={jobCat.label} value={jobCat.value}>{jobCat.label}</option>))
+												}
 											</select>
 										</div>
 
-										<div>
-											<label htmlFor="minSalary" className="label">Min Salary</label>
+										<div className="label-input-con">
+											<label htmlFor="company" className="label"> Company Name</label>
+											<select
+												className='input'
+												id='company'
+												parentid=""
+												// value={formData.company.companyName}
+												onChange={(e) => setCompanyId(e.target.value)}
+											// onChange={handleChange}
+											>
+												<option value={""}>none</option>
+												{
+													companies?.map(comp => (<option key={comp._id} value={comp._id}>{comp?.companyName}</option>))
+												}
+											</select>
+										</div>
+										<div className="label-input-con">
+											<label htmlFor="title" className="label"> Job Title</label>
 											<input
-												className='input small--input'
-												type='number'
-												id='minSalary'
-												placeholder='Min Salary'
-												value={state.salary.minSalary}
-												parentid="salary"
-												onChange={handleObjectChange}
+												className='input'
+												type='text'
+												id='title'
+												parentid=""
+												placeholder='Job Title'
+												value={formData.title}
+												onChange={handleChange}
 												required
+												autoComplete='on'
 											/>
 										</div>
-										<div>
-											<label htmlFor="maxSalary" className="label">Max Salary</label>
+
+										<div className="label-input-con">
+											<label htmlFor="jobType" className="label"> Job Type</label>
+											<select
+												className='input'
+												id='jobType'
+												parentid=""
+												value={formData.jobType}
+												onChange={handleChange}
+											>
+												{
+													jobTypes.map(type => (<option key={type.label} value={type.value}>{type.label}</option>))
+												}
+											</select>
+										</div>
+
+										<div className="label-input-con">
+											<label htmlFor="remoteOption" className="label"> Remote Option</label>
+											<select
+												className='input'
+												id='remoteOption'
+												parentid=""
+												value={formData.remoteOption}
+												onChange={handleChange}
+											>
+												{
+													remoteOptions.map(opt => (<option key={opt.label} value={opt.value}>{opt.label}</option>))
+												}
+											</select>
+										</div>
+
+										<div className="label-input-con">
+											<p className="label">Job Address</p>
+											<div className='gap-5 grid grid-cols-3'>
+												<div>
+													<label htmlFor="country" className="label">Country</label>
+													<select
+														className='input overflow-auto'
+														id='country'
+														parentid="location"
+														value={formData.location?.country ? formData.location?.country : country}
+														onChange={(event) => setCountry(event.target.value)}
+													>
+														<option value="">Select one</option>
+														{countries.map(item => (<option key={item.name + item.iso3} value={item.name}>{item.name}</option>))}
+													</select>
+												</div>
+
+												<div>
+													<label htmlFor="state" className="label">State</label>
+													<select
+														className='input'
+														id='state'
+														parentid="location"
+														value={formData.location?.state ? formData.location?.state : state}
+														onChange={(event) => setState(event.target.value)}
+													>
+														{/* <option value="">Select country</option> */}
+														{states.map(item => (<option key={item.name + item.state_code} value={item.name}>{item.name}</option>))}
+													</select>
+												</div>
+												<div>
+													<label htmlFor="city" className="label">City</label>
+													<select
+														className='input'
+														id='city'
+														parentid="location"
+														value={formData.location?.city ? formData.location?.city : city}
+														onChange={(event) => setCity(event.target.value)}
+													>
+														{/* <option value="">Select state</option> */}
+														{cities.map(item => (<option key={item} value={item}>{item}</option>))}
+													</select>
+												</div>
+											</div>
+										</div>
+
+										<div className="label-input-con">
+											<label htmlFor="postingDate" className="label"> Posting Date</label>
 											<input
-												className='input small--input'
-												type='number'
-												id='maxSalary'
-												placeholder='Max Salary'
-												value={state.salary.maxSalary}
-												parentid="salary"
-												onChange={handleObjectChange}
+												className='input'
+												type='date'
+												id='postingDate'
+												parentid=""
+												placeholder='Posting Date'
+												value={formData.postingDate}
+												onChange={handleChange}
 												required
+												autoComplete='off'
 											/>
 										</div>
-									</div>
-								</div>
+										<div className="label-input-con">
+											<label htmlFor="applicationDeadline" className="label">Application Deadline Date</label>
+											<input
+												className='input'
+												type='date'
+												id='applicationDeadline'
+												parentid=""
+												placeholder='Deadline Date'
+												value={formData.applicationDeadline}
+												onChange={handleChange}
+												required
+												autoComplete='off'
+											/>
+										</div>
 
+										<div className="label-input-con">
+											<label htmlFor="applyURL" className="label"> Application URL <span style={{ textTransform: "lowercase" }} >https:// URL</span></label>
+											<input
+												className='input'
+												type='url'
+												id='applyURL'
+												parentid=""
+												placeholder='https://example.com'
+												pattern="https://.*"
+												value={formData.applyURL}
+												onChange={handleChange}
+												required
+												autoComplete='on'
+											/>
+										</div>
 
+										<div className="label-input-con">
+											<p className="label">Experience Range in Years</p>
+											<div className='flex gap-5'>
+												<div>
+													<label htmlFor="minYears" className="label">Min Years</label>
+													<input
+														className='input small--input'
+														type='number'
+														id='minYears'
+														parentid="experience"
+														placeholder='Min Years'
+														value={formData.experience.minYears}
+														onChange={handleChange}
+														required
+													/>
+												</div>
+												<div >
+													<label htmlFor="maxYears" className="label">Max Years</label>
+													<input
+														className='input small--input'
+														type='number'
+														id='maxYears'
+														parentid="experience"
+														placeholder='Max Years'
+														value={formData.experience.maxYears}
+														onChange={handleChange}
+														required
+													/>
+												</div>
+											</div>
+										</div>
 
-								{/* <div className="label-input-con">
-												<label htmlFor="description" className="label"> Job Description</label>
-												<textarea
-													className='input textarea'
-													type='text'
-													cols={50}
-													rows={4}
-													id='description'
-													placeholder='AI Generated give me keys'
-													value={state.description}
-													onChange={handleChange}
-													required
-													autoComplete='on'
+										<div className="label-input-con">
+											<p className="label">Salary Range Annually</p>
+											<div className='flex gap-5'>
+												<div>
+													<label htmlFor="currency" className="label">Currency</label>
+													<select
+														className='input'
+														id='currency'
+														parentid="salary"
+														value={formData.salary.currency}
+														onChange={handleChange}
+													>
+														{currencies.map(currency => (<option key={currency} value={currency}>{currency}</option>))}
+													</select>
+												</div>
+
+												<div>
+													<label htmlFor="minSalary" className="label">Min Salary</label>
+													<input
+														className='input small--input'
+														type='number'
+														id='minSalary'
+														parentid="salary"
+														placeholder='Min Salary'
+														value={formData.salary.minSalary}
+														onChange={handleChange}
+														required
+													/>
+												</div>
+												<div>
+													<label htmlFor="maxSalary" className="label">Max Salary</label>
+													<input
+														className='input small--input'
+														type='number'
+														id='maxSalary'
+														parentid="salary"
+														placeholder='Max Salary'
+														value={formData.salary.maxSalary}
+														onChange={handleChange}
+														required
+													/>
+												</div>
+											</div>
+										</div>
+
+										<div className="label-input-con ">
+											<input
+												className='input btn cancel-btn'
+												type='button'
+												value={tobeEditted ? !jobDesc ? "Generate New Job Description" : "Regenerate Job Description" : "Generate Job Description"}
+												onClick={generateJobDesc}
 												/>
-											</div> */}
+										</div>
+										<div className="label-input-con ">
+											<input
+												className='input btn form-btn'
+												type='submit'
+												// disabled={!formData.description}
+												value={tobeEditted ? "Update Job" : "Post Job"}
+											/>
+										</div>
+										{
+											tobeEditted &&
+											<div className="label-input-con">
+												<input
+													className='input btn cancel-btn'
+													type='button'
+													value="Cancel Update"
+													onClick={() => navigate(-1)}
+												/>
+											</div>
+										}
 
-								<div className="label-input-con ">
-									<input
-										className='input form-btn'
-										type='submit'
-										value={tobeEditted ? "Update Job" : "Post Job"}
-									/>
-								</div>
-
-							</div>
-						</form>
+									</div>
+								</form>
 
 			}
-		</div>
+			</section>
 	);
 
 };

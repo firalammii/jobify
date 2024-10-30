@@ -5,6 +5,7 @@ import AddButton from './AddButton';
 import { companiesTableheads, jobsTableHeads, rowsOptions } from '../data/tableHeads';
 import { useSelector } from 'react-redux';
 import { Company } from '../pages';
+import path from 'path';
 
 const TableCompany = ({ handleAdd, handleChangePage, handleChangeRowsPerPage, selectModal }) => {
 
@@ -39,7 +40,7 @@ const TableCompany = ({ handleAdd, handleChangePage, handleChangeRowsPerPage, se
 										onClick={() => selectModal(body)}
 									>
 										<TableCell>{(currPage - 1) * rowsPerPage + index + 1}</TableCell>
-										<TableCell><img className='rounded-full h-7 w-7 object-cover' src={body?.companyLogo} /></TableCell>
+										<TableCell><img className='rounded-full h-12 w-12 object-cover' src={body.companyLogo} /> </TableCell>
 										<TableCell>{body?.companyName}</TableCell>
 										<TableCell>{body?.website}</TableCell>
 										<TableCell>

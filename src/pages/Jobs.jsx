@@ -9,7 +9,7 @@ import TableJobs from '../components/TableJobs';
 import { fetchJobsFailure, fetchJobsStart, fetchJobsSuccess, pageChange, rowsPerPageChange } from '../redux/jobSlice';
 
 import { jobURL } from '../api/urls';
-import { JobDatails } from '../components';
+import { AddButton, JobDatails, Pagination } from '../components';
 import { LINK_TO } from '../data/appData';
 
 const JobsPage = () => {
@@ -58,7 +58,7 @@ const JobsPage = () => {
 	};
 
 	return (
-		<div className='gridfullcol grid11row'>
+		<div className='gridfullcol grid11row w-full h-full'>
 			{
 				loading ?
 					<CircularProgress />
@@ -74,6 +74,16 @@ const JobsPage = () => {
 								handleChangePage={handleChangePage}
 								handleChangeRowsPerPage={handleChangeRowsPerPage}
 								selectModal={selectModal}
+							/>
+							<AddButton onClick={handleAdd} />
+							<Pagination
+								rowsOptions={rowsOptions}
+								rowsPerPage={rowsPerPage}
+								totalNum={totalNum}
+								totalPages={totalPages}
+								currPage={currPage}
+								onPageChange={handleChangePage}
+								onRowsPerPageChange={handleChangeRowsPerPage}
 							/>
 						</section>
 					</section>

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Filters } from '../components';
-import Jobs from '../../../../Jobs';
 import TableJobs from '../components/TableJobs';
 import JobsPage from './Jobs';
 

@@ -1,77 +1,61 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { CircularProgress, } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
-import { rowsOptions } from '../data/tableHeads';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { fetchCompaniesFailure, fetchCompaniesStart, fetchCompaniesSuccess } from '../redux/companySlice';
-import Company from './Company';
 import TableCompany from '../components/TableCompany';
 import { LINK_TO } from '../data/appData';
+import { companyURL } from '../api/urls';
 
-const url = "/api/companies";
 const CompanyPage = () => {
-	const [page, setPage] = useState(1);
-	const [rowsPerPage, setRowsPerPage] = useState(rowsOptions[0]);
 
 	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
-	const navigate = useNavigate();
+	const navigate = useNavigate();	
 
-	useEffect(() => {
+	const { loading, totalNum, currPage, rowsPerPage, totalPages } = useSelector(state => state.company);
+
+	const fetchCompanies = async (page, limit) => {
 		dispatch(fetchCompaniesStart());
-		const query = `?page=${page}&limit=${rowsPerPage}`;
-		let isMounted = true;
-		const controller = new AbortController();
-
-		const fetchCompanies = async () => {
-			try {
-				const { data } = await axios.get(url + query, {
-					signal: controller.signal
-				});
-
-				if (data.success === false)
-					dispatch(fetchCompaniesFailure(data.message));
-
-				isMounted && dispatch(fetchCompaniesSuccess(data));
-			} catch (err) {
-				console.error(err);
-				dispatch(fetchCompaniesFailure(err));
-				navigate({ from: location, replace: true });
-			}
-		};
-		fetchCompanies();
-		return () => {
-			isMounted = false;
-			controller.abort();
-		};
-	}, [rowsPerPage, page]);
-
-
-	const { loading, error, companies, totalNum, currPage, totalPages } = useSelector(state => state.company);
+		const query = `?page=${page}&limit=${limit}`;
+		//search query
+		try {
+			const { data } = await axios.get(companyURL + query);
+			dispatch(fetchCompaniesSuccess(data));
+		} catch (error) {
+			console.error(error);
+			dispatch(fetchCompaniesFailure(error.message || "Error While Fetching Companies"));
+			navigate({ from: location, replace: true });
+		}
+	};
 
 	const handleAdd = () => {
 		navigate(LINK_TO.addCompany);
 	};
+
 	const handleChangePage = async (value) => {
-		if (currPage + value > totalPages || currPage + value <= 0)
-			return;
-		setPage(prev => prev + value);
+		let page = 1;
+		if (currPage + value > totalPages)
+			page = 1;
+		else if (currPage + value <= 0)
+			page = totalPages;
+		else page = currPage + value;
+		await fetchCompanies(page, rowsPerPage);
 	};
 
-	const handleChangeRowsPerPage = (e) => {
-		setPage(1);
-		setRowsPerPage(e.target.value);
+	const handleChangeRowsPerPage = async (event) => {
+		event.preventDefault();
+		await fetchCompanies(1, event.target.value);
 	};
 
 	const selectModal = (item) => {
-		// setModal(item);
 		navigate(LINK_TO.viewCompany, { state: item });
 	};
 
 	return (
-		<div className='gridfullcol grid11row'>
+		<div className='gridfullcol grid11row w-full h-full'>
 			{
 				loading ?
 					<CircularProgress />

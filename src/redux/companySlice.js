@@ -42,7 +42,7 @@ const jobSlice = createSlice({
 			state.loading = true;
 		},
 		createCompanySuccess: (state, action) => {
-			state.companies = [...companies, action.payload];
+			state.companies = [...state.companies, action.payload];
 			state.loading = false;
 			state.error = null;
 		},

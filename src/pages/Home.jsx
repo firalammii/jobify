@@ -3,7 +3,7 @@ import React from 'react'
 function Home () {
   return (
     <div
-      className='gridfullcol grid11row py-20 px-4 max-w-6xl mx-auto flex flex-col gap-4'
+      className='gridfullcol grid11row py-20 px-4 max-w-6xl mx-auto flex flex-col gap-4 overflow-auto'
     >
       <h1 className='text-3xl font-bold  text-slate-800'>Jobify: Find Your Next Big Thing.</h1>
       <p className=' text-slate-700'>

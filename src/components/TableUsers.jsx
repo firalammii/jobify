@@ -8,8 +8,8 @@ import { ROLES } from '../data/roles';
 
 const TableUsers = ({ handleAdd, handleChangePage, handleChangeRowsPerPage, selectModal }) => {
 
-	const { users, currPage, totalNum, totalPages, rowsPerPage } = useSelector(state => state.user);
-
+	const { users, currPage, totalPages, rowsPerPage } = useSelector(state => state.user);
+	console.log(users)
 	return (
 		<Paper>
 			<TableContainer
@@ -27,7 +27,7 @@ const TableUsers = ({ handleAdd, handleChangePage, handleChangeRowsPerPage, sele
 					</TableHead>
 					<TableBody style={{ overflow: "auto" }} >
 						{
-							users?.map((body, index) => {
+							users.map((body, index) => {
 								const nroles = body?.roles?.filter(role => role !== ROLES.user);
 								return (
 									<TableRow
@@ -57,7 +57,6 @@ const TableUsers = ({ handleAdd, handleChangePage, handleChangeRowsPerPage, sele
 			<Pagination
 				rowsOptions={rowsOptions}
 				rowsPerPage={rowsPerPage}
-				totalNum={totalNum}
 				totalPages={totalPages}
 				currPage={currPage}
 				onPageChange={handleChangePage}

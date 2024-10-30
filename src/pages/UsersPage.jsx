@@ -11,63 +11,32 @@ import TableUsers from '../components/TableUsers';
 
 import { userURL } from '../api/urls.js';
 import { LINK_TO } from '../data/appData.js';
+import { useFetchUsers } from '../hooks/useFetchUsers.js';
 
 const UsersPage = () => {
 
 	const [modal, setModal] = useState(null);
-	const [page, setPage] = useState(1);
-	const [rowsPerPage, setRowsPerPage] = useState(rowsOptions[0]);
 
-	const axiosPrivate = useAxiosPrivate();
+	const axios = useAxiosPrivate();
 	const navigate = useNavigate();
-	const location = useLocation();
 	const dispatch = useDispatch();
 
-	useEffect(() => {
-		let isMounted = true;
-		const controller = new AbortController();
-		const query = `?page=${page}&limit=${rowsPerPage}`;
-
-		const getUsers = async () => {
-			dispatch(fetchUsersStart());
-			try {
-				const response = await axiosPrivate.get(userURL + query, {
-					signal: controller.signal
-				});
-				console.log(response.data);
-				isMounted && dispatch(fetchUsersSuccess(response.data));
-			} catch (err) {
-				console.error(err);
-				dispatch(fetchUsersFailure(err));
-				navigate({ from: location, replace: true });
-			}
-		};
-
-		getUsers();
-
-		return () => {
-			isMounted = false;
-			controller.abort();
-		};
-
-	}, [page, rowsPerPage]);
-
-	const { users, loading, error, totalNum, totalPages, currPage, length } = useSelector(state => state?.user);
-
-	const handleChangePage = async (value) => {
-		if (currPage + value > totalPages || currPage + value <= 0)
-			return;
-		setPage(prev => prev + value);
+	// const fetchUsers = useFetchUsers();
+	const fetchUsers = async (page, limit) => {
+		dispatch(fetchUsersStart());
+		const query = `?page=${page}&limit=${limit}`;
+		//search
+		try {
+			const { data } = await axios.get(userURL + query);
+			dispatch(fetchUsersSuccess(data));
+		} catch (error) {
+			console.error(error);
+			dispatch(fetchUsersFailure(error.message || "Error While Fetching Users"));
+		}
 	};
 
-	const handleChangeRowsPerPage = (e) => {
-		setPage(1);
-		setRowsPerPage(e.target.value);
-	};
+	const { loading, totalNum, totalPages, currPage, rowsPerPage } = useSelector(state => state?.user);
 
-	const selectModal = (item) => {
-		setModal(item);
-	};
 	const back = () => {
 		setModal(null);
 	};
@@ -75,8 +44,29 @@ const UsersPage = () => {
 	const handleAdd = () => {
 		navigate(LINK_TO.addUser);
 	};
+
+	const handleChangePage = async (value) => {
+		let page = 1;
+		if (currPage + value > totalPages)
+			page = 1;
+		else if (currPage + value <= 0)
+			page = totalPages;
+		else page = currPage + value;
+		await fetchUsers(page, rowsPerPage);
+	};
+
+	const handleChangeRowsPerPage = async (event) => {
+		event.preventDefault();
+		await fetchUsers(1, event.target.value);
+	};
+
+	const selectModal = (item) => {
+		navigate(LINK_TO.editUser, { state: item });
+		// setModal(item);
+	};
+
 	return (
-		<div className='gridfullcol grid11row'>
+		<div className='gridfullcol grid11row w-full h-full'>
 			{
 				loading ?
 					<CircularProgress />

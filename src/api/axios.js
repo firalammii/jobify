@@ -5,7 +5,9 @@ export const BASE_URL = 'http://localhost:3500';
 // export const BASE_URL = 'https://awcwssse.onrender.com';
 
 export default axios.create({
-    baseURL: BASE_URL
+    baseURL: BASE_URL,
+    headers: { 'Content-Type': 'application/json' },
+    // withCredentials: true
 });
 
 export const axiosPrivate = axios.create({

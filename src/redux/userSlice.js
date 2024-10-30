@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { sessionStorageKey } from '../data/roles';
 import { rowsOptions } from '../data/tableHeads';
 
 const initialState = {
@@ -26,7 +25,6 @@ const userSlice = createSlice({
 			state.currUser = action.payload;
 			state.loading = false;
 			state.error = null;
-			// sessionStorage.setItem(sessionStorageKey, JSON.stringify(action.payload));
 		},
 		signInFailure: (state, action) => {
 			state.currUser = null;
@@ -41,7 +39,6 @@ const userSlice = createSlice({
 			state.currUser = null;
 			state.loading = false;
 			state.error = null;
-			// sessionStorage.removeItem(sessionStorageKey);
 		},
 		signOutUserFailure: (state, action) => {
 			state.error = action.payload;
@@ -57,6 +54,7 @@ const userSlice = createSlice({
 				state.currPage = action.payload.currPage,
 				state.length = action.payload.length,
 				state.rowsPerPage = action.payload.rowsPerPage,
+
 				state.loading = false;
 			state.error = null;
 		},
@@ -93,7 +91,7 @@ const userSlice = createSlice({
 			state.loading = true;
 		},
 		createUserSuccess: (state, action) => {
-			state.users = state.users.push(action.payload);
+			state.users = [...state.users, action.payload];
 			state.loading = false;
 			state.error = null;
 		},
@@ -109,20 +107,19 @@ const userSlice = createSlice({
 			state.currUser = { ...state.currUser, accessToken: action.payload };
 			state.loading = false;
 			state.error = null;
-			// sessionStorage.setItem(sessionStorageKey, JSON.stringify(action.payload));
 		},
 		refreshFailure: (state, action) => {
 			state.currUser = null;
 			state.loading = false;
 			state.error = null;
-			// sessionStorage.removeItem(sessionStorageKey);
 		},
 
 		updateMeStart: (state) => {
 			state.loading = true;
 		},
 		updateMeSuccess: (state, action) => {
-			state.currUser = action.payload;
+			state.users = state.users.map(user => user._id === action.payload._id ? action.payload : user);
+			state.currUser = { ...state.currUser, ...action.payload };
 			state.loading = false;
 			state.error = null;
 		},
@@ -138,7 +135,6 @@ const userSlice = createSlice({
 			state.currUser = null;
 			state.loading = false;
 			state.error = null;
-			// sessionStorage.removeItem(sessionStorageKey);
 		},
 		deleteMeFailure: (state, action) => {
 			state.error = action.payload;

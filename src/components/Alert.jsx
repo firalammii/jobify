@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { DoneRounded, BlockRounded } from '@mui/icons-material';
 
-const Alert = ({ returnFunction, success, message }) => {
+const Alert = ({ returnFunction, success, message, style }) => {
     const btnRef = useRef(null);
 
     useEffect(() => {
@@ -10,8 +10,8 @@ const Alert = ({ returnFunction, success, message }) => {
 
     return (
         <div
-            className='shadow-md w-2/3 h-72 m-w-200 rounded-xl p-10 grid place-items-center gap-5 bg-white mx-auto'
-            onClick={(e) => e.stopPropagation()}
+            className='shadow-md w-4/5 h-3/5 p-10 max-w-lg  m-auto rounded-xl grid place-items-center gap-5 overflow-auto bg-white'
+            style={style}
         >
             <div className={`h-24 w-24 rounded-full font-bold grid place-items-center text-white ${success ? 'bg-green-600' : 'bg-red-600'}`}>
                 {

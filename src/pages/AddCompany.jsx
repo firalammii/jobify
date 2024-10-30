@@ -1,23 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileOpenRounded } from "@mui/icons-material";
-
-import {
-	CitySelect,
-	CountrySelect,
-	StateSelect,
-	LanguageSelect,
-} from "react-country-state-city";
-import "react-country-state-city/dist/react-country-state-city.css";
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Alert } from '../components';
-import { useDispatch, useSelector } from 'react-redux';
-import { companyTypes, countries, } from '../data/formData';
-
+import { useDispatch } from 'react-redux';
+import { companyTypes, } from '../data/formData';
 import '../css/forms.scss';
 import '../css/overlay.scss';
 
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
-import { useLocation } from 'react-router-dom';
+import { app } from '../firebase';
+import { citiesURL, countriesURL, statesURL } from '../api/urls';
+import { createCompanyFailure, createCompanyStart, createCompanySuccess } from '../redux/companySlice';
 
 const initial = {
 	companyType: "",
@@ -29,106 +23,168 @@ const initial = {
 	companyLogo: "",
 	description: ""
 };
-
-function AddCompany ({ tobeEditted }) {
+const initFileErr = {
+	companyLogo: false,
+	description: false
+};
+function AddCompany () {
 	const inputRef = useRef("");
-	const [state, setState] = useState(initial);
-	const [door, setDoor] = useState("");
-	const [alertMsg, setAlertMsg] = useState("");
-	const [success, setSuccess] = useState(false);
-
-	const [countryid, setCountryId] = useState(0);
-	const [stateid, setStateId] = useState(0);
+	const [formData, setFormData] = useState(initial);
+	const [countries, setCountries] = useState([]);
+	const [states, setStates] = useState([]);
+	const [cities, setCities] = useState([]);
+	const [country, setCountry] = useState("");
+	const [state, setState] = useState("");
+	const [city, setCity] = useState("");
+	const [alert, setAlert] = useState({ visible: false, success: false, message: "" });
+	const [fileError, setFileError] = useState(initFileErr);
 
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const axios = useAxiosPrivate();
-	const { state: stateFromLocation } = useLocation();
+	const { state: tobeEditted } = useLocation();
 
+	const clearFields = () => setFormData(initial);
+	const closeAlert = () => setAlert({ ...alert, visible: false });
+	const openAlert = (success, msg) => setAlert({ visible: true, success: success, message: msg });
 
 	useEffect(() => {
 		if (tobeEditted)
-			setState(tobeEditted);
-		else if (stateFromLocation)
-			setState(stateFromLocation);
-		else
-			setState(initial);
+			setFormData(tobeEditted);
+		const getAllCountries = async () => {
+			const { data } = await axios.get(countriesURL);
+			if (!data.error)
+				setCountries(data.data);
+			else openAlert(false, data.data.msg);
+		};
+		getAllCountries();
 	}, []);
 
-	console.log(state)
+	useEffect(() => {
+		const getStates = async () => {
+			const { data } = await axios.post(statesURL,
+				JSON.stringify({ country })
+			);
+			if (!data.data.error)
+				setStates(data.data.states);
+			else openAlert(false, data.data.msg);
+		};
+		if (country)
+			getStates();
+	}, [country]);
 
-	const clearFields = () => {
-		setState(initial);
+	useEffect(() => {
+		const getCities = async () => {
+			const { data } = await axios.post(citiesURL,
+				JSON.stringify({ country: country, state: state })
+			);
+			if (!data.error)
+				setCities(data.data);
+			else openAlert(false, data.data.msg);;
+		};
+		if (state)
+			getCities();
+	}, [state]);
+	useEffect(() => {
+		if (country && state && city) {
+			setFormData({ ...formData, location: { country, state, city } });
+		}
+	}, [country, state, city]);
+
+	const handleFileUpload = (event) => {
+		const file = event.target.files[0];
+		const fieldName = event.target.id;
+		const storage = getStorage(app);
+		const fileName = new Date().getTime() + file.name;
+		const storageRef = ref(storage, fileName);
+		const uploadTask = uploadBytesResumable(storageRef, file);
+
+		uploadTask.on(
+			'state_changed',
+			null,
+			(error) => {
+				console.error(error);
+				setFileError({ ...fileError, [fieldName]: true });
+			},
+			() => {
+				getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+					console.log(downloadURL);
+					setFileError({ ...fileError, [fieldName]: false });
+					setFormData({ ...formData, [fieldName]: downloadURL });
+				}
+				);
+			}
+		);
 	};
 
-	const handleChange = (e) => {
-		if (e.target.type === "file")
-			setState({ ...state, [e.target.id]: e.target.files[0] });
+	const inValidInputs = () => {
+		if (
+			!formData.companyLogo ||
+			!formData.companyName ||
+			!formData.companyType ||
+			!formData.description ||
+			!formData.email ||
+			!formData.location.city ||
+			!formData.location.country ||
+			!formData.telNumber.line ||
+			!formData.website
+		) {
+			openAlert(false, "ooops There Empty Field in Form, All fields are Required !!");
+			return true;
+		}
+		return false;
+	};
+
+	const handleChange = (event) => {
+		const fieldName = event.target.attributes.parentid.value;
+		if (fieldName)
+			setFormData({ ...formData, [fieldName]: { ...formData[fieldName], [event.target.id]: event.target.value } });
+		else if (event.target.type === "file")
+			handleFileUpload(event);
 		else
-			setState({ ...state, [e.target.id]: e.target.value });
-	};
-
-	const handleObjectChange = (e) => {
-		const fieldName = e.target.attributes.parentid.value;
-		setState({ ...state, [fieldName]: { ...state[fieldName], [e.target.id]: e.target.value } });
-	};
-	const handleLocation = (e, fieldName) => {
-		setState({ ...state, location: { ...state.location, [fieldName]: e.name } });
+			setFormData({ ...formData, [event.target.id]: event.target.value });
 	};
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		console.log(state);
-		const validInputs = state.companyType && state.email && state.companyName && state.location.city && state.location.country && state.website && state.telNumber.line && state.telNumber.mobile;
-		if (!validInputs) {
-			setAlertMsg("ooops There Empty Field in Form, All fields are Required !!");
-			return;
-		}
-		setAlertMsg("");
-		// const formData = new FormData();
-		// formData.append("companyType", companyType);
-		// formData.append("companyName", companyName);
-		// formData.append("companyLogo", companyLogo);
-		// formData.append("location", location);
-		// formData.append("website", website);
-		// formData.append("telNumber", telNumber);
-		// formData.append("description", description);
-
-		try {
-			const response = await axios.post('/api/companies', state, {
-				headers: { 'Content-Type': 'application/json' },
-			});
-			console.log(response);
-
-			setSuccess(true);
-			setAlertMsg("company is Posted Successfully !!");
-			clearFields();
-		} catch (err) {
-			console.log(err);
-			setSuccess(false);
-			setAlertMsg('Sorry !! Posting the Company is Failed, Try Again Later !');
+		console.log(formData);
+		if (!inValidInputs()) {
+			try {
+				dispatch(createCompanyStart());
+				const { data } = await axios.post('/api/companies', formData);
+				dispatch(createCompanySuccess(data));
+				openAlert(true, "Company is Posted Successfully !!");
+				clearFields();
+			} catch (error) {
+				console.error(error);
+				const msg = error.response?.data?.message;
+				dispatch(createCompanyFailure(msg ? msg : error.message));
+				openAlert(false, msg ? msg : error.message);
+				// setAlert({ visible: true, success: false, message: "Sorry !! Posting the Company is Failed, Try Again Later !" });
+			}
 		}
 	};
 
 	return (
-		<div className="AddComp gridfullcol grid11row max-w-4xl shadow-md p-5 overflow-auto mx-auto">
+		<section className="gridfullcol grid11row w-full h-full overflow-auto shadow-md rounded-md max-w-5xl mx-auto p-5">
 			{
-				alertMsg ?
-					<div className='overlay'>
-						<Alert
-							returnFunction={() => setAlertMsg("")}
-							message={alertMsg}
-							success={success}
-						/>
-					</div>
+				alert.visible ?
+					<Alert
+						returnFunction={closeAlert}
+						message={alert.message}
+						success={alert.success}
+						style={{ width: "100%", marginTop: 100 }}
+					/>
 					:
 					<form className="form" onSubmit={handleSubmit} >
-						<div className="inputs-con">
+						<div className="inputs-con w-full">
 							<div className="label-input-con">
 								<label htmlFor="companyType" className="label"> Company Type</label>
 								<select
 									className='input'
 									id='companyType'
-									value={state.companyType}
+									parentid=""
+									value={formData.companyType}
 									onChange={handleChange}
 								>
 									{
@@ -143,8 +199,9 @@ function AddCompany ({ tobeEditted }) {
 									className='input'
 									type='text'
 									id='companyName'
+									parentid=""
 									placeholder='Company Name'
-									value={state.companyName}
+									value={formData.companyName}
 									onChange={handleChange}
 									required
 									autoComplete='on'
@@ -157,9 +214,10 @@ function AddCompany ({ tobeEditted }) {
 									className='input'
 									type='url'
 									id='website'
+									parentid=""
 									pattern='https://www.*'
 									placeholder='https://www.*'
-									value={state.website}
+									value={formData.website}
 									onChange={handleChange}
 									required
 									autoComplete='on'
@@ -172,54 +230,57 @@ function AddCompany ({ tobeEditted }) {
 									className='input'
 									type='email'
 									id='email'
+									parentid=""
 									placeholder='Company Email'
-									value={state.email}
+									value={formData.email}
 									onChange={handleChange}
 									required
 									autoComplete='on'
 								/>
 							</div>
 
-							<div className='label-input-con'>
-								<p className="label">Job Address</p>
-								<div className='flex gap-5'>
-									<div style={{ width: "100%" }}>
+							<div className="label-input-con">
+								<p className="label">Company Address</p>
+								<div className='gap-5 grid grid-cols-3'>
+									<div>
 										<label htmlFor="country" className="label">Country</label>
-										<CountrySelect
+										<select
+											className='input overflow-auto'
 											id='country'
 											parentid="location"
-											onChange={(e) => {
-												setCountryId(e.id);
-												handleLocation(e, "country", e.id);
-											}}
-											placeHolder="Select Country"
-											autoComplete="off"
-										/>
+											// value={formData.location?.country}
+											onChange={(event) => setCountry(event.target.value)}
+										>
+											<option value="">Select one</option>
+											{countries.map(item => (<option key={item.name + item.iso3} value={item.name}>{item.name}</option>))}
+										</select>
 									</div>
 
 									<div>
-										<label htmlFor="state" className="label"> State</label>
-										<StateSelect
+										<label htmlFor="state" className="label">State</label>
+										<select
+											className='input'
 											id='state'
 											parentid="location"
-											countryid={countryid}
-											onChange={(e) => {
-												setStateId(e.id);
-												handleLocation(e, "state", e.id);
-											}}
-											placeHolder="Select State"
-										/>
+											// value={formData.location?.state}
+											onChange={(event) => setState(event.target.value)}
+										>
+											{/* <option value="">Select country</option> */}
+											{states.map(item => (<option key={item.name + item.state_code} value={item.name}>{item.name}</option>))}
+										</select>
 									</div>
-									<div >
-										<label htmlFor="city" className="label"> City</label>
-										<CitySelect
+									<div>
+										<label htmlFor="city" className="label">City</label>
+										<select
+											className='input'
 											id='city'
-											countryid={countryid}
-											stateid={stateid}
-											onChange={(e) => handleLocation(e, "city", e.id)}
-											placeHolder="Select City"
 											parentid="location"
-										/>
+											// value={formData.location?.city}
+											onChange={(event) => setCity(event.target.value)}
+										>
+											{/* <option value="">Select state</option> */}
+											{cities.map(item => (<option key={item} value={item}>{item}</option>))}
+										</select>
 									</div>
 								</div>
 							</div>
@@ -228,68 +289,95 @@ function AddCompany ({ tobeEditted }) {
 								<p className="label">Telephone Number</p>
 								<div className='flex gap-5'>
 									<div>
-										<label htmlFor="mobile" className="mobile">Mobile</label>
-										<input
-											className='input small--input'
-											type='tel'
-											id='mobile'
-											placeholder='phone number'
-											parentid="telNumber"
-											// pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-											value={state.telNumber?.mobile}
-											onChange={handleObjectChange}
-											required
-											autoCorrect='on'
-										/>
-									</div>
-									<div>
 										<label htmlFor="line" className="label">Line</label>
 										<input
 											className='input small--input'
 											type='tel'
 											id='line'
+											parentid="telNumber"
 											// pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
 											placeholder='phone number'
+											required
+											value={formData.telNumber?.line}
+											onChange={handleChange}
+										/>
+									</div>
+									<div>
+										<label htmlFor="mobile" className="mobile">Mobile</label>
+										<input
+											className='input small--input'
+											type='tel'
+											id='mobile'
 											parentid="telNumber"
-											value={state.telNumber?.line}
-											onChange={handleObjectChange}
+											placeholder='phone number'
+											// pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+											value={formData.telNumber?.mobile}
+											onChange={handleChange}
+											autoCorrect='on'
 										/>
 									</div>
 								</div>
 							</div>
 
-							{/* <div className="label-input-con">
-								<label htmlFor="logo" className="label logo"> Select Logo
-									<div className='input logo'>
-										<FileOpenRounded color='primary' fontSize='small' />
-									</div>
-								</label>
-								<input
-									className='input '
-									type='file'
-									name='companyLogo'
-									id='companyLogo'
-									value={state.companyLogo}
-									onChange={handleChange}
-									required
-								/>
-							</div> */}
-							{/*
 							<div className="label-input-con">
-								<label htmlFor="description" className="label"> Company Description</label>
-								<input
-									className='input'
-									type='file'
-									name='description'
-									id='description'
-									value={state.description}
-									onChange={handleChange}
-									required
-								/>
+								{
+									tobeEditted?.companyLogo ?
+										<label htmlFor='companyLogo' className='flex items-center gap-5 cursor-pointer' >
+											<img src={formData.companyLogo} alt='company logo' className='w-20 h-20 border rounded-full object-cover' />
+											select one
+											<input
+												className='input'
+												hidden
+												type='file'
+												accept='image/*'
+												name='companyLogo'
+												id='companyLogo'
+												parentid=""
+												onChange={handleChange}
+											/>
+										</label>
+										:
+										<>
+											<label htmlFor="logo" className="label logo">
+												Select Logo
+												<span className='text-red-600 lowercase ml-2'>
+													{fileError.companyLogo && "Cannot Upload the file at the moment"}
+												</span>
+											</label>
+											<span className='input border flex items-center'>
+												<input
+													type='file'
+													accept='image/*'
+													name='companyLogo'
+													id='companyLogo'
+													parentid=""
+													onChange={handleChange}
+												// required
+												/>
+											</span>
+										</>
+								}
+							</div>
 
-							</div> */}
-
-
+							<div className="label-input-con">
+								<label htmlFor="description" className="label">
+									Company Description
+									<span className='text-red-600 lowercase ml-2'>
+										{fileError.description && "Cannot Upload the file at the moment"}
+									</span>
+								</label>
+								<span className='input border flex items-center'>
+									<input
+										type='file'
+										accept='application/pdf'
+										name='description'
+										id='description'
+										parentid=""
+										onChange={handleChange}
+									// required
+									/>
+								</span>
+							</div>
 
 							<div className="label-input-con">
 								<input
@@ -303,8 +391,9 @@ function AddCompany ({ tobeEditted }) {
 								<div className="label-input-con">
 									<input
 										className='input form-btn cancel-btn'
-										type='submit'
+											type='button'
 										value="Cancel Update"
+											onClick={() => navigate(-1)}
 									/>
 								</div>
 							}
@@ -312,7 +401,7 @@ function AddCompany ({ tobeEditted }) {
 						</div>
 					</form>
 			}
-		</div>
+		</section >
 	);
 
 }

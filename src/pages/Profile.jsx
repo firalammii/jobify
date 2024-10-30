@@ -1,45 +1,47 @@
 import { useSelector } from 'react-redux';
-import { useRef, useState, useEffect } from 'react';
-import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from 'firebase/storage';
-import { app } from '../firebase';
-import {
-  updateUserStart,
-  updateUserSuccess,
-  updateUserFailure,
-  deleteUserFailure,
-  deleteUserStart,
-  deleteUserSuccess,
-  signOutUserStart,
-  deleteMeStart,
-  deleteMeFailure,
-  deleteMeSuccess,
-} from '../redux/userSlice';
+import { useRef, useState, useEffect, } from 'react';
 import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { getDownloadURL, getStorage, ref, uploadBytesResumable, } from 'firebase/storage';
 
+import { app } from '../firebase';
+import { updateUserStart, updateUserSuccess, updateUserFailure, signOutUserStart, deleteMeStart, deleteMeFailure, deleteMeSuccess, updateMeFailure, updateMeSuccess, updateMeStart, } from '../redux/userSlice';
 import { signOutUserFailure, signOutUserSuccess } from '../redux/userSlice';
+import { logInURL, logOutURL, userURL } from '../api/urls';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { LINK_TO } from '../data/appData';
+const PWD_REGEX = /(?=^.{8,}$)(?=.*\d)(?=.*[!@#$%^&*]+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
 export default function Profile() {
+
   const fileRef = useRef(null);
   const { currUser, loading, error } = useSelector((state) => state.user);
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [validPassword, setValidPassword] = useState(true);
+  const [matchPassword, setMatchPassword] = useState(true);
+
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const axios = useAxiosPrivate();
 
   useEffect(() => {
     if (file) {
       handleFileUpload(file);
     }
   }, [file]);
+
+  useEffect(() => {
+    if (formData.oldPassword) {
+      setValidPassword(PWD_REGEX.test(newPassword));
+      setMatchPassword(newPassword === confirmPassword);
+    }
+  }, [newPassword, confirmPassword])
 
   const handleFileUpload = (file) => {
     const storage = getStorage(app);
@@ -55,6 +57,7 @@ export default function Profile() {
         setFilePerc(Math.round(progress));
       },
       (error) => {
+        console.log(error)
         setFileUploadError(true);
       },
       () => {
@@ -71,43 +74,24 @@ export default function Profile() {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
-      dispatch(updateUserStart());
-      const res = await fetch(`/api/users/${currUser._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (data.success === false) {
-        dispatch(updateUserFailure(data.message));
-        return;
-      }
-
-      dispatch(updateUserSuccess(data));
+      dispatch(updateMeStart());
+      const { data } = await axios.put(`${userURL}/${currUser._id}`, JSON.stringify(formData));
+      dispatch(updateMeSuccess(data));
       setUpdateSuccess(true);
+      document.getElementById("profileform").reset();
+
     } catch (error) {
-      dispatch(updateUserFailure(error.message));
+      dispatch(updateMeFailure(error.message));
     }
   };
 
   const handleDeleteUser = async () => {
     try {
       dispatch(deleteMeStart());
-      const res = await fetch(`/api/users/${currUser._id}`, {
-        method: 'DELETE',
-      });
-      console.log(res)
-
-      const data = await res.json();
-      if (data.success === false) {
-        dispatch(deleteMeFailure(data.message));
-        return;
-      }
+      const { data } = await axios.delete(`${userURL}/${currUser._id}`);
       dispatch(deleteMeSuccess(data));
     } catch (error) {
       dispatch(deleteMeFailure(error.message));
@@ -117,23 +101,23 @@ export default function Profile() {
   const handleSignOut = async () => {
     try {
       dispatch(signOutUserStart());
-      const res = await fetch('/api/auth/signout');
+      const res = await fetch(logOutURL);
       if (res.status === 204) {
         dispatch(signOutUserSuccess());
-        navigate('/signin');
+        navigate(LINK_TO.signIn);
         return;
       }
-      dispatch(signOutUserFailure("didn't signed out"));
+      dispatch(signOutUserFailure("Log out Failed"));
     } catch (error) {
-      console.log(error);
+      console.error(error);
       dispatch(signOutUserFailure(error.message));
     }
   };
 
   return (
-    <div className='gridcentercol gridcenterrow p-3 flex flex-col gap-4 max-w-xl'>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-        <div className='flex gap-4 items-end'>
+    <section className='gridfullcol grid11row w-full h-full p-10 pt-0 max-w-lg m-auto shadow-md rounded-md'>
+      <form onSubmit={handleSubmit} id="profileform" className=' flex flex-col gap-4 overflow-auto'>
+        <div className='text-center grid place-items-center gap-4'>
           <input
             onChange={(e) => setFile(e.target.files[0])}
             type='file'
@@ -145,28 +129,28 @@ export default function Profile() {
             onClick={() => fileRef.current.click()}
             src={formData.avatar || currUser?.avatar}
             alt='profile'
-            className='rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2'
+            className='rounded-full h-32 w-32 object-cover cursor-pointer self-center mt-10 mb-2 hover:scale-150 '
           />
-          <div className='flex flex-col'>
-            <label htmlFor='email' className=''>{currUser?.email}</label>
-            <label htmlFor='firstName' className='font-bold'>{currUser?.firstName + " " + currUser?.lastName}</label>
-          </div>
-        </div>
-        <div className='flex justify-between items-center mt-5'>
           <p className='text-sm self-start'>
-          {fileUploadError ? (
-            <span className='text-red-700'>
-              Error Image upload (image must be less than 2 mb)
-            </span>
-          ) : filePerc > 0 && filePerc < 100 ? (
-            <span className='text-slate-700'>{`Uploading ${filePerc}%`}</span>
-          ) : filePerc === 100 ? (
-            <span className='text-green-700'>Image successfully uploaded!</span>
+            {fileUploadError ? (
+              <span className='text-red-700'>
+                Error Image upload ({fileUploadError})
+              </span>
+            ) : filePerc > 0 && filePerc < 100 ? (
+              <span className='text-slate-700'>{`Uploading ${filePerc}%`}</span>
+            ) : filePerc === 100 ? (
+              <span className='text-green-700'>Image successfully uploaded!</span>
             ) : ("")}
           </p>
+          <div className='flex flex-col'>
+            <label htmlFor='firstName' className='font-bold'>{currUser?.firstName + " " + currUser?.lastName}</label>
+            <label htmlFor='email' className=''>{currUser?.email}</label>
+          </div>
+        </div>
+        <div className='flex justify-between items-center'>
           <span
             onClick={handleSignOut}
-            className='text-blue-700 pt-1 pb-1 pl-4 pr-4 cursor-pointer hover:bg-blue-600 hover:text-white rounded-md ml-auto'
+            className='bg-white text-blue-700 pt-1 pb-1 pl-4 pr-4 cursor-pointer hover:bg-blue-600 hover:text-white rounded-md ml-auto'
           >
             Sign Out
           </span>
@@ -189,24 +173,24 @@ export default function Profile() {
         <input
           type='password'
           placeholder='old password'
-          onChange={handleChange}
           id='password'
+          onChange={handleChange}
           className='border p-3 rounded-lg'
         />
         <input
           type='password'
           placeholder='create new password'
+          id='newPassword'
           onChange={handleChange}
-          id='new_password'
-          className='border p-3 rounded-lg'
+          className={`'border p-3 rounded-lg' ${!validPassword ? 'border-red-600' : ''}`}
         />
 
         <input
           type='password'
           placeholder='confirm new password'
+          id='confirmPassword'
           onChange={handleChange}
-          id='conf_password'
-          className='border p-3 rounded-lg'
+          className={`'border p-3 rounded-lg' ${!matchPassword ? 'border-red-600' : ''}`}
         />
         <button
           disabled={loading}
@@ -214,20 +198,17 @@ export default function Profile() {
         >
           {loading ? 'Loading...' : 'Update'}
         </button>
-      </form>
+
       <div className='flex justify-between mt-5'>
         <span
           onClick={handleDeleteUser}
-          className='text-red-700 pt-1 pb-1 pl-3 pr-3 cursor-pointer hover:bg-red-600 hover:text-white rounded-md'
+            className='bg-black text-red-700 pt-1 pb-1 pl-3 pr-3 cursor-pointer hover:bg-red-600 hover:text-white rounded-md'
         >
           Delete account
         </span>
       </div>
-
-      <p className='text-red-700 mt-5'>{error ? error : ''}</p>
-      <p className='text-green-700 mt-5'>
-        {updateSuccess ? 'User is updated successfully!' : ''}
-      </p>
-    </div>
+        <p className={error ? 'text-red-700 mt-5' : 'text-green-700 mt-5'}>{updateSuccess ? 'User is updated successfully!' : error ? error.message : ''}</p>
+      </form>
+    </section>
   );
 }

@@ -37,12 +37,11 @@ function Filters () {
 	const { companies } = useSelector(state => state.company);
 
 	const fetchJobs = async () => {
-		dispatch(fetchJobsStart());
-		dispatch(rowsPerPageChange(rowsPerPage));
-		const query = `page=${currPage}&limit=${rowsPerPage}&company=${state.company}&jobCategory=${state.jobCategory}&remoteOption=${state.remoteOption}&createdAt=${state.createdAt}&postingDate=${state.postingDate}&title=${state.title}&minSalary=${state.minSalary}&maxSalary=${state.maxSalary}&minYears=${state.minYears}&maxYears=${state.maxYears}&location=${state.location}&skills=${state.skills}`;
+		dispatch(fetchJobsStart()); 
+		const query = `/?q=page=${currPage}&limit=${rowsPerPage}&company=${state.company}&jobCategory=${state.jobCategory}&remoteOption=${state.remoteOption}&createdAt=${state.createdAt}&postingDate=${state.postingDate}&title=${state.title}&minSalary=${state.minSalary}&maxSalary=${state.maxSalary}&minYears=${state.minYears}&maxYears=${state.maxYears}&location=${state.location}&skills=${state.skills}`;
 
 		try {
-			const response = await axios.get(`/api/jobs?${query}`);
+			const response = await axios.get(`/api/jobs${query}`);
 			console.log("response: ", response);
 			dispatch(fetchJobsSuccess(response.data));
 
@@ -57,13 +56,13 @@ function Filters () {
 		const titleFromUrl = urlParams.get('title');
 		if (titleFromUrl)
 			setState((prev) => ({ ...prev, title: titleFromUrl }));
-
-		fetchJobs();
 	}, [location.search]);
 
 	useEffect(() => {
-
-		fetchJobs();
+		const urlParams = new URLSearchParams(location.search);
+		const titleFromUrl = urlParams.get('title');
+		if (!titleFromUrl)
+			fetchJobs();
 	}, [state]);
 
 	const handleChange = (e) => {

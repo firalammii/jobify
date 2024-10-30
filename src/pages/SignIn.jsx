@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  signInStart,
-  signInSuccess,
-  signInFailure,
-} from '../redux/userSlice';
 
-import { sessionStorageKey } from '../data/roles';
+import { signInStart, signInSuccess, signInFailure, } from '../redux/userSlice';
+import axios from '../api/axios';
+import { LINK_TO } from '../data/appData';
+import { logInURL } from '../api/urls';
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
@@ -15,9 +13,10 @@ export default function SignIn() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/jobs";
+  const from = location.state?.from?.pathname || LINK_TO.home;
 
   const dispatch = useDispatch();
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -29,24 +28,12 @@ export default function SignIn() {
     e.preventDefault();
     try {
       dispatch(signInStart());
-      const res = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (data.success === false) {
-        dispatch(signInFailure(data.message));
-        return;
-      }
+      const { data } = await axios.post(logInURL, JSON.stringify(formData));
       dispatch(signInSuccess(data));
       navigate(from, { replace: true });
     } catch (error) {
-      dispatch(signInFailure(error.message));
+      console.error(error);
+      dispatch(signInFailure(error?.response?.data?.message));
     }
   };
   return (
@@ -54,7 +41,6 @@ export default function SignIn() {
       <h1 className='text-3xl text-center font-semibold my-7'>Sign In</h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <input
-          // type='email'
           type='text'
           placeholder='email'
           className='border p-3 rounded-lg'
@@ -75,14 +61,7 @@ export default function SignIn() {
         >
           {loading ? 'Loading...' : 'Sign In'}
         </button>
-        {/* <OAuth/> */}
       </form>
-      {/* <div className='flex gap-2 mt-5'>
-        <p>Dont have an account?</p>
-        <Link to={'/sign-up'}>
-          <span className='text-blue-700'>Sign up</span>
-        </Link>
-      </div> */}
       {error && <p className='text-red-500 mt-5'>{error}</p>}
     </div>
   );

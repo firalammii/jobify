@@ -12,7 +12,8 @@ const TableJobs = ({ handleAdd, handleChangePage, handleChangeRowsPerPage, selec
 	return (
 		<Paper>
 			<TableContainer
-				style={{ height: "calc(100vh - 156px)" }}
+				style={{ height: "calc(100vh - 0.1px)", paddingBottom: "200px" }}
+				// style={{ height: "calc(100vh - 156px)" }}
 			>
 				<Table
 					stickyHeader
@@ -24,7 +25,7 @@ const TableJobs = ({ handleAdd, handleChangePage, handleChangeRowsPerPage, selec
 							{jobsTableHeads?.map((column) => (<TableCell key={column.id}> {column.label}</TableCell>))}
 						</TableRow>
 					</TableHead>
-					<TableBody style={{ overflow: "auto" }} >
+					<TableBody style={{ overflow: "auto", height: "80%" }} >
 						{
 							jobs?.map((body, index) => {
 								return (
@@ -52,7 +53,7 @@ const TableJobs = ({ handleAdd, handleChangePage, handleChangeRowsPerPage, selec
 					</TableBody>
 				</Table>
 			</TableContainer>
-			<AddButton onClick={handleAdd} />
+			{/* <AddButton onClick={handleAdd} />
 			<Pagination
 				rowsOptions={rowsOptions}
 				rowsPerPage={rowsPerPage}
@@ -61,7 +62,7 @@ const TableJobs = ({ handleAdd, handleChangePage, handleChangeRowsPerPage, selec
 				currPage={currPage}
 				onPageChange={handleChangePage}
 				onRowsPerPageChange={handleChangeRowsPerPage}
-			/>
+			/> */}
 		</Paper>
 	);
 }
