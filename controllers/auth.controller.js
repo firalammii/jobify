@@ -10,13 +10,13 @@ const handleLogin = async (req, res, next) => {
 		const { email, password } = req.body;
 
 		if (!email || !password)
-			return res.status(400).json({ message: "No sufficeint data for login" });
+			return res.status(400).json({ message: "No Sufficeint Data, Email and Password are Required" });
 		const foundUser = await UserModel.findOne({ email }).exec();
 		if (!foundUser)
-			return res.status(404).json({ message: "Can not found you" });
+			return res.status(404).json({ message: "Incorrect Email or Password" });
 		const matchPwd = await compare(password, foundUser.password);
 		if (!matchPwd)
-			return res.status(404).json({ message: "Can not found you" });
+			return res.status(404).json({ message: "Incorrect Email or Password" });
 		const tokenObj = {
 			email: foundUser.email,
 			roles: foundUser.roles,

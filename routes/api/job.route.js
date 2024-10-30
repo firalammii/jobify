@@ -1,5 +1,5 @@
 const express = require('express');
-const { ROLES_LIST } = require('../../config/roles');
+const { ROLES } = require('../../config/roles');
 const { authorize } = require('../../middlewares/authorize');
 const { getAllJobs, createJob, updateJob, deleteJob, getJob, searchJobs } = require('../../controllers/jobs.controller');
 
@@ -17,13 +17,13 @@ router.route('/:id')
 
 
 // router.route('/')
-//   .get([authorize(ROLES_LIST.SUPER, ROLES_LIST.ADMIN), getAllJobs])
-// 	.post([authorize(ROLES_LIST.SUPER, ROLES_LIST.ADMIN), createJob]);
+//   .get([authorize(ROLES.super, ROLES.admin), getAllJobs])
+// 	.post([authorize(ROLES.super, ROLES.admin), createJob]);
 // 
 // router.route('/:id')
-// 	.get([authorize(ROLES_LIST.SUPER, ROLES_LIST.ADMIN), getJob])
-// 	.put([authorize(ROLES_LIST.SUPER, ROLES_LIST.ADMIN), updateJob])
-// 	.delete([authorize(ROLES_LIST.SUPER, ROLES_LIST.ADMIN),deleteJob]);
+// 	.get([authorize(ROLES.super, ROLES.admin), getJob])
+// 	.put([authorize(ROLES.super, ROLES.admin), updateJob])
+// 	.delete([authorize(ROLES.super, ROLES.admin),deleteJob]);
 
 
 module.exports = router;

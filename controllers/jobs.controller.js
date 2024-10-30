@@ -91,9 +91,34 @@ const getJob = async (req, res) => {
 
 const createJob = async (req, res) => {
 	try {
-		// const jobObj = _.pick(req.body, ["category", "location", "companies", "salary","type", "title","skills", "competence", "due_date",]);
-		const jobObj = req.body;
-		const job = await JobModel.create(jobObj);
+		const {
+			title,
+			jobCategory,
+			company,
+			salary,
+			location,
+			jobType,
+			remoteOption,
+			applyURL,
+			experience,
+			postingDate,
+			applicationDeadline,
+		} = req.body;
+
+		// const jobObj = req.body;
+		const job = await JobModel.create({
+			title,
+			jobCategory,
+			company: company.id,
+			salary,
+			location,
+			jobType,
+			remoteOption,
+			applyURL,
+			experience,
+			postingDate,
+			applicationDeadline,
+		});
 		const addingSucceded = await addJobs(job);
 		if (!addingSucceded) throw ({ error, company_message: "Company does not found" });
 		return res.status(201).json(job);

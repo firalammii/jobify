@@ -1,7 +1,7 @@
-const ROLES_LIST = {
-	ADMIN: "ADMIN",
-	SUPER: "SUPER_ADMIN",
-	USER: "USER",
+const ROLES = {
+	admin: "ADMIN",
+	super: "SUPER_ADMIN",
+	user: "USER",
 };
 
 const tokenTimeouts = {
@@ -11,6 +11,6 @@ const tokenTimeouts = {
 }
 
 module.exports = {
-	ROLES_LIST,
+	ROLES,
 	tokenTimeouts,
 };

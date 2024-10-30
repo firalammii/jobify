@@ -1,8 +1,7 @@
-
 const express = require('express');
 const { authorize } = require('../../middlewares/authorize');
 const { getAllUsers, createUser, updateUser, deleteUser, getUser } = require('../../controllers/user.controller');
-const { ROLES_LIST } = require('../../config/roles');
+const { ROLES } = require('../../config/roles');
 
 const router = express.Router();
 
@@ -16,12 +15,12 @@ router.route('/:id')
 	.delete([deleteUser]);
 
 // router.route('/')
-// 	.get([authorize(ROLES_LIST.SUPER), getAllUsers])
-// 	.post([authorize(ROLES_LIST.SUPER), createUser]);
+// 	.get([authorize(ROLES.super), getAllUsers])
+// 	.post([authorize(ROLES.super), createUser]);
 // 
 // router.route('/:id')
-// 	.get([authorize(ROLES_LIST.SUPER), getUser])
-// 	.put([authorize(ROLES_LIST.SUPER), updateUser])
-// 	.delete([authorize(ROLES_LIST.SUPER), deleteUser]);
+// 	.get([authorize(ROLES.super), getUser])
+// 	.put([authorize(ROLES.super), updateUser])
+// 	.delete([authorize(ROLES.super), deleteUser]);
 
 module.exports = router;
