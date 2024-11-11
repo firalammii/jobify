@@ -19,7 +19,9 @@ const jobSlice = createSlice({
 		fetchJobsStart: (state) => {
 			state.loading = true;
 		},
-
+		// fetchJobsStart(state) {
+		// 	state.loading = true;
+		// },
 		fetchJobsSuccess: (state, action) => {
 			state.jobs = action.payload.jobs;
 			state.totalNum = action.payload.totalNum;
@@ -41,7 +43,8 @@ const jobSlice = createSlice({
 			state.loading = true;
 		},
 		createJobSuccess: (state, action) => {
-			state.jobs = action.payload;
+			state.jobs = [action.payload, ...state.jobs];
+			state.totalNum = state.totalNum + 1;
 			state.loading = false;
 			state.error = null;
 		},
@@ -54,7 +57,7 @@ const jobSlice = createSlice({
 			state.loading = true;
 		},
 		updateJobSuccess: (state, action) => {
-			state.jobs = [...jobs.map(item => item._id === action.payload._id ? action.payload : item)];;
+			state.jobs = [...state.jobs.map(item => item._id === action.payload._id ? action.payload : item)];;
 			state.loading = false;
 			state.error = null;
 		},
@@ -67,7 +70,8 @@ const jobSlice = createSlice({
 			state.loading = true;
 		},
 		deleteJobSuccess: (state, action) => {
-			state.jobs = [...jobs.filter(job => job._id !== action.payload._id)];
+			state.jobs = [...state.jobs.filter(job => job._id !== action.payload._id)];
+			state.totalNum = state.totalNum - 1;
 			state.loading = false;
 			state.error = null;
 		},

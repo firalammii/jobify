@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -8,6 +8,7 @@ import { LINK_TO } from '../data/appData';
 import { logInURL } from '../api/urls';
 
 export default function SignIn() {
+  const inputRef = useRef(null)
   const [formData, setFormData] = useState({});
   const { loading, error, } = useSelector((state) => state.user);
 
@@ -16,6 +17,10 @@ export default function SignIn() {
   const from = location.state?.from?.pathname || LINK_TO.home;
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    inputRef.current.focus();
+  }, [])
 
   const handleChange = (e) => {
     setFormData({
@@ -37,8 +42,8 @@ export default function SignIn() {
     }
   };
   return (
-    <div className='gridcentercol gridcenterrow  p-3 max-w-xl  mt-20'>
-      <h1 className='text-3xl text-center font-semibold my-7'>Sign In</h1>
+    <div className='gridfullcol grid11row w-full rounded-lg shadow max-w-xl flex flex-col gap-5 m-auto p-10'>
+      <h1 className='text-3xl text-center font-semibold my-5'>Sign In</h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <input
           type='text'
@@ -46,6 +51,7 @@ export default function SignIn() {
           className='border p-3 rounded-lg'
           id='email'
           onChange={handleChange}
+          ref={inputRef}
         />
         <input
           type='password'

@@ -381,7 +381,7 @@ function AddCompany () {
 
 							<div className="label-input-con">
 								<input
-									className='input form-btn'
+									className='input btn form-btn'
 									type='submit'
 									value={tobeEditted ? "Update Company" : "Add Company"}
 								/>
@@ -390,7 +390,7 @@ function AddCompany () {
 								tobeEditted &&
 								<div className="label-input-con">
 									<input
-										className='input form-btn cancel-btn'
+											className='input btn cancel-btn'
 											type='button'
 										value="Cancel Update"
 											onClick={() => navigate(-1)}

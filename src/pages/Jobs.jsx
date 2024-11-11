@@ -17,12 +17,13 @@ const JobsPage = () => {
 	const dispatch = useDispatch();
 	const axios = useAxiosPrivate();
 	const navigate = useNavigate();
+	const { state: company } = useLocation();
 
-	const { jobs, totalNum, length, currPage, rowsPerPage, totalPages, error, loading } = useSelector(state => state.job);
+	const { totalNum, currPage, rowsPerPage, totalPages, loading } = useSelector(state => state.job);
 
 	const fetchJobs = async (page, limit) => {
 		dispatch(fetchJobsStart());
-		const query = `?page=${page}&limit=${limit}`;
+		const query = `?page=${page}&limit=${limit}&company=${company?.companyId ? company.companyId : ""}`;
 		//query add companyId
 		try {
 			const { data } = await axios.get(jobURL + query);
@@ -65,7 +66,7 @@ const JobsPage = () => {
 					:
 					<section className='w-full h-full relative'>
 						<header className='flex justify-between text-slate-700 capitalize bg-slate-100 shadow-md p-2 text-sm font-bold'  >
-							<h1 className='uppercase '>Jobs table</h1>
+							<h1 className='uppercase '>{company?.tableTitle ? company.tableTitle : "Jobs table"}</h1>
 							<span>total: {totalNum} Jobs</span>
 						</header>
 						<section className='bg-white pb-14'>

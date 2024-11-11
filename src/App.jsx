@@ -63,14 +63,10 @@ export default function App() {
     }
   };
 
-  console.log("App")
-
   return (
     <section className='App'>
       <BrowserRouter>
-
         <AppHeader />
-
         <Routes>
           <Route path={LINK_TO.home} element={<Home />} />
           <Route path={LINK_TO.about} element={<About />} />
@@ -85,7 +81,9 @@ export default function App() {
             <Route path={LINK_TO.viewCompany} element={<Company />} />
           </Route>
 
-          <Route element={<RequireAuth allowedRoles={[ROLES.admin]} />}>
+          {/* <Route path='jobs'> */}
+          {/* <Route path='lists' element={<JobsPage />} /> */}
+          <Route path='jobs' element={<RequireAuth allowedRoles={[ROLES.admin]} />}>
             <Route path={LINK_TO.listJobs} element={<JobsPage />} />
             <Route path={LINK_TO.addJob} element={<AddJob />} />
             <Route path={LINK_TO.editJob} element={<AddJob />} />

@@ -54,13 +54,15 @@ function Filters () {
 	useEffect(() => {
 		const urlParams = new URLSearchParams(location.search);
 		const titleFromUrl = urlParams.get('title');
-		if (titleFromUrl)
-			setState((prev) => ({ ...prev, title: titleFromUrl }));
+		const companyFromUrl = urlParams.get('company');
+		if (titleFromUrl || companyFromUrl)
+			setState((prev) => ({ ...prev, title: titleFromUrl, company: companyFromUrl }));
 	}, [location.search]);
 
 	useEffect(() => {
 		const urlParams = new URLSearchParams(location.search);
 		const titleFromUrl = urlParams.get('title');
+		const companyFromUrl = urlParams.get('company');
 		if (!titleFromUrl)
 			fetchJobs();
 	}, [state]);

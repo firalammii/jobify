@@ -35,7 +35,7 @@ export default function AppHeader () {
     } catch (error) {
       dispatch(fetchJobsFailure());
     }
-    navigate(`/jobs/search?${searchQuery}`);
+    navigate(`${LINK_TO.searchJob}/?${searchQuery}`);
   };
 
   useEffect(() => {

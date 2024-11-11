@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { CircularProgress } from '@mui/material'
 
 import '../css/forms.scss';
@@ -45,6 +45,7 @@ function AddJob () {
 	const { companies, loading } = useSelector(state => state?.company);
 	// console.log(companies)
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const { state: tobeEditted } = useLocation();
 	const axios = useAxiosPrivate();
 
@@ -53,10 +54,18 @@ function AddJob () {
 	const openAlert = (success, msg) => setAlert({ visible: true, success: success, message: msg });
 
 	const generateJobDesc = async () => {
-		setJobDesc({ description: "", visible: false });
+		setJobDesc({ description: "", visible: true });
 		if (!inValidInputs()) {
-			const { data } = await axios.post(aiURL, formData);
-			setJobDesc({ visible: true, description: data });
+			try {
+				const { data } = await axios.post(aiURL, formData);
+				setJobDesc({ visible: true, description: data });
+			} catch (error) {
+				setJobDesc({ description: "", visible: false });
+				openAlert(false, error.message);
+			}
+		} else {
+			setJobDesc({ description: "", visible: false });
+			openAlert(false, "Some Fields are reqired !!");
 		}
 	};
 
@@ -105,28 +114,25 @@ function AddJob () {
 	useEffect(() => {
 		if (companyId) {
 			const companyObj = companies.find(comp => comp._id === companyId);
-			setFormData({ ...formData, company: { id: companyId, companyName: companyObj?.companyName } });
+			setFormData({ ...formData, company: { id: companyId, companyName: companyObj?.companyName, }, location: companyObj.location });
 		}
 	}, [companyId]);
 
 	const inValidInputs = (final = false) => {
-		console.log(formData);
-		if (
+		return (
 			!formData.title ||
 			!formData.jobType ||
 			!formData.company ||
 			!formData.jobCategory ||
-			!formData.salary ||
+			!formData.salary.minSalary ||
+			!formData.salary.maxSalary ||
+			!formData.experience.minYears ||
+			!formData.experience.maxYears ||
 			!formData.remoteOption ||
-			!formData.postingDate ||
-			!formData.applicationDeadline
-			// (final ? !formData.description : true)
-		) {
-			openAlert(false, "ooops Ther");
-			// openAlert(false, "ooops There are Empty Fields in Form, All fields are Required !!");
-			return true;
-		}
-		return false;
+			// !formData.postingDate ||
+			!formData.applicationDeadline ||
+			(final ? !formData.description : false)
+		);
 	};
 
 	const handleChange = (event) => {
@@ -141,13 +147,13 @@ function AddJob () {
 
 	const save = () => {
 		setJobDesc({ ...jobDesc, visible: false });
-		setState({ ...formData, description: jobDesc.description });
+		setFormData({ ...formData, description: jobDesc.description });
 	};
 
 	const handleSubmit = async (e) => {
 		console.log(formData)
 		e.preventDefault();
-		if (inValidInputs(true)) {
+		if (!inValidInputs(true)) {
 			try {
 				dispatch(createJobStart());
 				const { data } = await axios.post(jobURL, formData);
@@ -160,336 +166,348 @@ function AddJob () {
 				dispatch(createJobFailure(msg ? msg : error.message));
 				openAlert(false, msg ? msg : error.message);
 			}
-		}
+		} else openAlert(false, "Some Fields are reqired !!")
 	};
 
+	console.log('====================================');
+	console.log(tobeEditted);
+	console.log('====================================');
+
 	return (
-		loading ?
-			<p>loading</p>
-			:
-			<section className="gridfullcol grid11row w-full h-full overflow-auto  shadow-md rounded-md p-5 flex m-auto">
+		<>
 			{
-					alert.visible ?
-						<Alert
-							returnFunction={closeAlert}
-							message={alert.message}
-							success={alert.success}
-							style={{ width: "100%", marginTop: 100 }}
-						/>
+
+				loading ?
+					<p>loading</p>
 					:
-						jobDesc.visible && !jobDesc.description ?
-							<CircularProgress /> :
-							jobDesc.visible && jobDesc.description ?
-								<section className='p-5 shadow-md rounded-md bg-slate-200 h-3/4 w-3/4 justify-self-center overflow-auto fixed m-auto'>
-									<textarea
-										className='bg-white shadow-md rounded-md resize-none w-full border-none outline-none'
-										cols={100}
-										rows={20}
-										value={jobDesc.description}
-										onChange={(e) => setJobDesc({ ...jobDesc, description: e.target.value })}
-									>
-									</textarea>
-									<div className='flex gap-5 justify-end mt-3' >
-										<Button
-											label="Back"
-											style={{ backgroundColor: "gray", color: "white" }}
-											onClick={() => setJobDesc({ visible: false, description: "" })}
-										/>
-										<Button
-											label="Regenerate"
-											style={{ backgroundColor: "blue", color: "white" }}
-											onClick={generateJobDesc}
-										/>
-										<Button
-											label="Save"
-											style={{ backgroundColor: "green", color: "white" }}
-											onClick={save}
-										/>
-
-									</div>
-
-								</section>
+					<section className="gridfullcol grid11row w-full h-full overflow-auto  shadow-md rounded-md p-5">
+						{
+							alert.visible ?
+								<Alert
+									returnFunction={closeAlert}
+									message={alert.message}
+									success={alert.success}
+									style={{ width: "100%", marginTop: 100 }}
+								/>
 								:
-								<form className="form " onSubmit={handleSubmit} >
-									<div className="inputs-con">
+								jobDesc.visible && !jobDesc.description ?
+									<CircularProgress /> :
+									jobDesc.visible && jobDesc.description ?
+										<section className='overlay'>
+											<div className='p-5 shadow-md rounded-md bg-slate-200 w-4/5 h-4/5 border'>
+												<textarea
+													className='bg-white shadow-md rounded-md resize-none w-full border-none outline-none'
+													cols={100}
+													rows={22}
+													value={jobDesc.description}
+													onChange={(e) => setJobDesc({ ...jobDesc, description: e.target.value })}
+												>
+												</textarea>
+												<div className='mt-3' >
+													<div className='flex gap-5 justify-end ' >
+														<Button
+															label="Back"
+															style={{ backgroundColor: "gray", color: "white" }}
+															onClick={() => setJobDesc({ visible: false, description: "" })}
+														/>
+														<Button
+															label="Regenerate"
+															style={{ backgroundColor: "blue", color: "white" }}
+															onClick={generateJobDesc}
+														/>
+														<Button
+															label="Save"
+															style={{ backgroundColor: "green", color: "white" }}
+															onClick={save}
+														/>
+													</div>
+												</div>
+											</div>
+										</section>
+										:
+										<form className="form " onSubmit={handleSubmit} >
+											<div className="inputs-con">
 
-										<div className="label-input-con ">
-											<label htmlFor="jobCategory" className="label"> Job Category</label>
-											<select
-												className='input '
-												id='jobCategory'
-												parentid=""
-												value={formData.jobCategory}
-												onChange={handleChange}
-											>
-												{
-													jobCategories.map(jobCat => (<option key={jobCat.label} value={jobCat.value}>{jobCat.label}</option>))
-												}
-											</select>
-										</div>
-
-										<div className="label-input-con">
-											<label htmlFor="company" className="label"> Company Name</label>
-											<select
-												className='input'
-												id='company'
-												parentid=""
-												// value={formData.company.companyName}
-												onChange={(e) => setCompanyId(e.target.value)}
-											// onChange={handleChange}
-											>
-												<option value={""}>none</option>
-												{
-													companies?.map(comp => (<option key={comp._id} value={comp._id}>{comp?.companyName}</option>))
-												}
-											</select>
-										</div>
-										<div className="label-input-con">
-											<label htmlFor="title" className="label"> Job Title</label>
-											<input
-												className='input'
-												type='text'
-												id='title'
-												parentid=""
-												placeholder='Job Title'
-												value={formData.title}
-												onChange={handleChange}
-												required
-												autoComplete='on'
-											/>
-										</div>
-
-										<div className="label-input-con">
-											<label htmlFor="jobType" className="label"> Job Type</label>
-											<select
-												className='input'
-												id='jobType'
-												parentid=""
-												value={formData.jobType}
-												onChange={handleChange}
-											>
-												{
-													jobTypes.map(type => (<option key={type.label} value={type.value}>{type.label}</option>))
-												}
-											</select>
-										</div>
-
-										<div className="label-input-con">
-											<label htmlFor="remoteOption" className="label"> Remote Option</label>
-											<select
-												className='input'
-												id='remoteOption'
-												parentid=""
-												value={formData.remoteOption}
-												onChange={handleChange}
-											>
-												{
-													remoteOptions.map(opt => (<option key={opt.label} value={opt.value}>{opt.label}</option>))
-												}
-											</select>
-										</div>
-
-										<div className="label-input-con">
-											<p className="label">Job Address</p>
-											<div className='gap-5 grid grid-cols-3'>
-												<div>
-													<label htmlFor="country" className="label">Country</label>
+												<div className="label-input-con ">
+													<label htmlFor="jobCategory" className="label"> Job Category</label>
 													<select
-														className='input overflow-auto'
-														id='country'
-														parentid="location"
-														value={formData.location?.country ? formData.location?.country : country}
-														onChange={(event) => setCountry(event.target.value)}
+														className='input '
+														id='jobCategory'
+														parentid=""
+														value={formData.jobCategory}
+														onChange={handleChange}
 													>
-														<option value="">Select one</option>
-														{countries.map(item => (<option key={item.name + item.iso3} value={item.name}>{item.name}</option>))}
+														{
+															jobCategories.map(jobCat => (<option key={jobCat.label} value={jobCat.value}>{jobCat.label}</option>))
+														}
 													</select>
 												</div>
 
-												<div>
-													<label htmlFor="state" className="label">State</label>
+												<div className="label-input-con">
+													<label htmlFor="company" className="label"> Company Name</label>
 													<select
 														className='input'
-														id='state'
-														parentid="location"
-														value={formData.location?.state ? formData.location?.state : state}
-														onChange={(event) => setState(event.target.value)}
+														id='company'
+														parentid=""
+														// value={formData.company.companyName}
+														onChange={(e) => setCompanyId(e.target.value)}
+													// onChange={handleChange}
 													>
-														{/* <option value="">Select country</option> */}
-														{states.map(item => (<option key={item.name + item.state_code} value={item.name}>{item.name}</option>))}
+														<option value={""}>none</option>
+														{
+															companies?.map(comp => (<option key={comp._id} value={comp._id}>{comp?.companyName}</option>))
+														}
 													</select>
 												</div>
-												<div>
-													<label htmlFor="city" className="label">City</label>
+												<div className="label-input-con">
+													<label htmlFor="title" className="label"> Job Title</label>
+													<input
+														className='input'
+														type='text'
+														id='title'
+														parentid=""
+														placeholder='Job Title'
+														value={formData.title}
+														onChange={handleChange}
+														required
+														autoComplete='on'
+													/>
+												</div>
+
+												<div className="label-input-con">
+													<label htmlFor="jobType" className="label"> Job Type</label>
 													<select
 														className='input'
-														id='city'
-														parentid="location"
-														value={formData.location?.city ? formData.location?.city : city}
-														onChange={(event) => setCity(event.target.value)}
+														id='jobType'
+														parentid=""
+														value={formData.jobType}
+														onChange={handleChange}
 													>
-														{/* <option value="">Select state</option> */}
-														{cities.map(item => (<option key={item} value={item}>{item}</option>))}
+														{
+															jobTypes.map(type => (<option key={type.label} value={type.value}>{type.label}</option>))
+														}
 													</select>
 												</div>
-											</div>
-										</div>
 
-										<div className="label-input-con">
-											<label htmlFor="postingDate" className="label"> Posting Date</label>
-											<input
-												className='input'
-												type='date'
-												id='postingDate'
-												parentid=""
-												placeholder='Posting Date'
-												value={formData.postingDate}
-												onChange={handleChange}
-												required
-												autoComplete='off'
-											/>
-										</div>
-										<div className="label-input-con">
-											<label htmlFor="applicationDeadline" className="label">Application Deadline Date</label>
-											<input
-												className='input'
-												type='date'
-												id='applicationDeadline'
-												parentid=""
-												placeholder='Deadline Date'
-												value={formData.applicationDeadline}
-												onChange={handleChange}
-												required
-												autoComplete='off'
-											/>
-										</div>
-
-										<div className="label-input-con">
-											<label htmlFor="applyURL" className="label"> Application URL <span style={{ textTransform: "lowercase" }} >https:// URL</span></label>
-											<input
-												className='input'
-												type='url'
-												id='applyURL'
-												parentid=""
-												placeholder='https://example.com'
-												pattern="https://.*"
-												value={formData.applyURL}
-												onChange={handleChange}
-												required
-												autoComplete='on'
-											/>
-										</div>
-
-										<div className="label-input-con">
-											<p className="label">Experience Range in Years</p>
-											<div className='flex gap-5'>
-												<div>
-													<label htmlFor="minYears" className="label">Min Years</label>
-													<input
-														className='input small--input'
-														type='number'
-														id='minYears'
-														parentid="experience"
-														placeholder='Min Years'
-														value={formData.experience.minYears}
-														onChange={handleChange}
-														required
-													/>
-												</div>
-												<div >
-													<label htmlFor="maxYears" className="label">Max Years</label>
-													<input
-														className='input small--input'
-														type='number'
-														id='maxYears'
-														parentid="experience"
-														placeholder='Max Years'
-														value={formData.experience.maxYears}
-														onChange={handleChange}
-														required
-													/>
-												</div>
-											</div>
-										</div>
-
-										<div className="label-input-con">
-											<p className="label">Salary Range Annually</p>
-											<div className='flex gap-5'>
-												<div>
-													<label htmlFor="currency" className="label">Currency</label>
+												<div className="label-input-con">
+													<label htmlFor="remoteOption" className="label"> Remote Option</label>
 													<select
 														className='input'
-														id='currency'
-														parentid="salary"
-														value={formData.salary.currency}
+														id='remoteOption'
+														parentid=""
+														value={formData.remoteOption}
 														onChange={handleChange}
 													>
-														{currencies.map(currency => (<option key={currency} value={currency}>{currency}</option>))}
+														{
+															remoteOptions.map(opt => (<option key={opt.label} value={opt.value}>{opt.label}</option>))
+														}
 													</select>
 												</div>
 
-												<div>
-													<label htmlFor="minSalary" className="label">Min Salary</label>
+												<div className="label-input-con">
+													<p className="label">Job Address</p>
+													<div className='gap-5 grid grid-cols-3'>
+														<div>
+															<label htmlFor="country" className="label">Country</label>
+															<select
+																className='input overflow-auto'
+																id='country'
+																parentid="location"
+																value={formData.location?.country ? formData.location?.country : country}
+																onChange={(event) => setCountry(event.target.value)}
+															>
+																<option value="">Select one</option>
+																{countries.map(item => (<option key={item.name + item.iso3} value={item.name}>{item.name}</option>))}
+															</select>
+														</div>
+
+														<div>
+															<label htmlFor="state" className="label">State</label>
+															<select
+																className='input'
+																id='state'
+																parentid="location"
+																value={formData.location?.state ? formData.location?.state : state}
+																onChange={(event) => setState(event.target.value)}
+															>
+																{/* <option value="">Select country</option> */}
+																{states.map(item => (<option key={item.name + item.state_code} value={item.name}>{item.name}</option>))}
+															</select>
+														</div>
+														<div>
+															<label htmlFor="city" className="label">City</label>
+															<select
+																className='input'
+																id='city'
+																parentid="location"
+																value={formData.location?.city ? formData.location?.city : city}
+																onChange={(event) => setCity(event.target.value)}
+															>
+																{/* <option value="">Select state</option> */}
+																{cities.map(item => (<option key={item} value={item}>{item}</option>))}
+															</select>
+														</div>
+													</div>
+												</div>
+
+												<div className="label-input-con">
+													<label htmlFor="postingDate" className="label"> Posting Date</label>
 													<input
-														className='input small--input'
-														type='number'
-														id='minSalary'
-														parentid="salary"
-														placeholder='Min Salary'
-														value={formData.salary.minSalary}
+														className='input'
+														type='date'
+														id='postingDate'
+														parentid=""
+														placeholder='Posting Date'
+														value={formData.postingDate}
 														onChange={handleChange}
-														required
+														autoComplete='off'
 													/>
 												</div>
-												<div>
-													<label htmlFor="maxSalary" className="label">Max Salary</label>
+												<div className="label-input-con">
+													<label htmlFor="applicationDeadline" className="label">Application Deadline Date</label>
 													<input
-														className='input small--input'
-														type='number'
-														id='maxSalary'
-														parentid="salary"
-														placeholder='Max Salary'
-														value={formData.salary.maxSalary}
+														className='input'
+														type='date'
+														id='applicationDeadline'
+														parentid=""
+														placeholder='Deadline Date'
+														value={formData.applicationDeadline}
 														onChange={handleChange}
 														required
+														autoComplete='off'
 													/>
 												</div>
+
+												<div className="label-input-con">
+													<label htmlFor="applyURL" className="label"> Application URL <span style={{ textTransform: "lowercase" }} >https:// URL</span></label>
+													<input
+														className='input'
+														type='url'
+														id='applyURL'
+														parentid=""
+														placeholder='https://example.com'
+														pattern="https://.*"
+														value={formData.applyURL}
+														onChange={handleChange}
+														required
+														autoComplete='on'
+													/>
+												</div>
+
+												<div className="label-input-con">
+													<p className="label">Experience Range in Years</p>
+													<div className='flex gap-5'>
+														<div>
+															<label htmlFor="minYears" className="label">Min Years</label>
+															<input
+																className='input small--input'
+																type='number'
+																id='minYears'
+																parentid="experience"
+																placeholder='Min Years'
+																value={formData.experience.minYears}
+																onChange={handleChange}
+																required
+															/>
+														</div>
+														<div >
+															<label htmlFor="maxYears" className="label">Max Years</label>
+															<input
+																className='input small--input'
+																type='number'
+																id='maxYears'
+																parentid="experience"
+																placeholder='Max Years'
+																value={formData.experience.maxYears}
+																onChange={handleChange}
+																required
+															/>
+														</div>
+													</div>
+												</div>
+
+												<div className="label-input-con">
+													<p className="label">Salary Range Annually</p>
+													<div className='flex gap-5'>
+														<div>
+															<label htmlFor="currency" className="label">Currency</label>
+															<select
+																className='input'
+																id='currency'
+																parentid="salary"
+																value={formData.salary.currency}
+																onChange={handleChange}
+															>
+																{currencies.map(currency => (<option key={currency} value={currency}>{currency}</option>))}
+															</select>
+														</div>
+
+														<div>
+															<label htmlFor="minSalary" className="label">Min Salary</label>
+															<input
+																className='input small--input'
+																type='number'
+																id='minSalary'
+																parentid="salary"
+																placeholder='Min Salary'
+																value={formData.salary.minSalary}
+																onChange={handleChange}
+																required
+															/>
+														</div>
+														<div>
+															<label htmlFor="maxSalary" className="label">Max Salary</label>
+															<input
+																className='input small--input'
+																type='number'
+																id='maxSalary'
+																parentid="salary"
+																placeholder='Max Salary'
+																value={formData.salary.maxSalary}
+																onChange={handleChange}
+																required
+															/>
+														</div>
+													</div>
+												</div>
+
+												<div className="label-input-con ">
+													<input
+														className='input btn cancel-btn'
+														type='button'
+														value={tobeEditted ? !jobDesc ? "Generate New Job Description" : "Regenerate Job Description" : "Generate Job Description"}
+														onClick={generateJobDesc}
+													/>
+												</div>
+												<div className="label-input-con ">
+													<input
+														className='input btn form-btn'
+														type='submit'
+														// disabled={!formData.description}
+														value={tobeEditted ? "Update Job" : "Post Job"}
+													/>
+												</div>
+												{
+													tobeEditted &&
+													<div className="label-input-con">
+															<button
+																type='button'
+																className='input btn cancel-btn'
+																onClick={() => navigate(-1)}
+														>
+															Cancel Update
+														</button>
+
+													</div>
+												}
+
 											</div>
-										</div>
+										</form>
 
-										<div className="label-input-con ">
-											<input
-												className='input btn cancel-btn'
-												type='button'
-												value={tobeEditted ? !jobDesc ? "Generate New Job Description" : "Regenerate Job Description" : "Generate Job Description"}
-												onClick={generateJobDesc}
-												/>
-										</div>
-										<div className="label-input-con ">
-											<input
-												className='input btn form-btn'
-												type='submit'
-												// disabled={!formData.description}
-												value={tobeEditted ? "Update Job" : "Post Job"}
-											/>
-										</div>
-										{
-											tobeEditted &&
-											<div className="label-input-con">
-												<input
-													className='input btn cancel-btn'
-													type='button'
-													value="Cancel Update"
-													onClick={() => navigate(-1)}
-												/>
-											</div>
-										}
-
-									</div>
-								</form>
-
+						}
+					</section>
 			}
-			</section>
+		</>
 	);
 
 };

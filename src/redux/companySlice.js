@@ -43,6 +43,7 @@ const jobSlice = createSlice({
 		},
 		createCompanySuccess: (state, action) => {
 			state.companies = [...state.companies, action.payload];
+			state.totalNum = state.totalNum + 1;
 			state.loading = false;
 			state.error = null;
 		},
@@ -69,6 +70,7 @@ const jobSlice = createSlice({
 		},
 		deleteCompanySuccess: (state, action) => {
 			state.companies = [...state.companies.filter(item => item._id !== action.payload._id)];
+			state.totalNum = state.totalNum - 1;
 			state.loading = false;
 			state.error = null;
 		},

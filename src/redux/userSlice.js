@@ -79,6 +79,7 @@ const userSlice = createSlice({
 		},
 		deleteUserSuccess: (state, action) => {
 			state.users = state.users.filter((user) => user._id !== action.payload._id);
+			state.totalNum = state.totalNum - 1;
 			state.loading = false;
 			state.error = null;
 		},
@@ -92,6 +93,7 @@ const userSlice = createSlice({
 		},
 		createUserSuccess: (state, action) => {
 			state.users = [...state.users, action.payload];
+			state.totalNum = state.totalNum + 1;
 			state.loading = false;
 			state.error = null;
 		},

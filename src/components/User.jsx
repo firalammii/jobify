@@ -94,9 +94,9 @@ const User = () => {
 						<div className='h-10 flex items-center pl-10 '>
 							<p className={alert.success ? 'text-green-600' : 'text-red-600'}>{alert.message}</p>
 						</div>
-						{/* <div className='absolute top-4 right-4'>
+						<div className='absolute top-4 right-4'>
 							<CloseButton onClose={back} />
-						</div> */}
+						</div>
 					</>
 			}
 		</div>

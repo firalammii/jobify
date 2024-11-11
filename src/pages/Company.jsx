@@ -17,18 +17,23 @@ function Company () {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const axios = useAxiosPrivate();
-	const { state } = useLocation();
+	const { state: company } = useLocation();
 
 	const { rowsPerPage } = useSelector(state => state.job);
 
 	const handleSeeJobs = async () => {
 		seeJobs.current = !seeJobs.current;
 		if (seeJobs) {
-			const query = `page=${1}&limit=${rowsPerPage}&company=${state._id}&createdAt=1`;
+			const urlParams = new URLSearchParams(window.location.search);
+			urlParams.set('company', company._id);
+			// const searchQuery = urlParams.toString();
+			const searchQuery = `page=${1}&limit=${rowsPerPage}` + urlParams.toString();
+			// const query = `page=${1}&limit=${rowsPerPage}&company=${company._id}&createdAt=1`;
 			try {
-				const { data } = await axios.get(`${jobURL}?${query}`);
+				const { data } = await axios.get(`${jobURL}?${searchQuery}`);
 				// console.log("response: ", response);
 				dispatch(fetchJobsSuccess(data));
+				navigate(`${LINK_TO.searchJob}/?${searchQuery}`, { state: { tableTitle: "Jobs by: " + company.companyName, companyId: company._id } })
 			} catch (error) {
 				console.error(error);
 				dispatch(fetchJobsFailure(error));
@@ -37,13 +42,13 @@ function Company () {
 	};
 
 	const handleEdit = async () => {
-		navigate(LINK_TO.editCompany, { state });
+		navigate(LINK_TO.editCompany, { state: company });
 	}
 
 	const handleDeleteCompany = async () => {
 		dispatch(deleteCompanyStart());
 		try {
-			const { data } = await axios.delete(`${companyURL}/${state._id}`);
+			const { data } = await axios.delete(`${companyURL}/${company._id}`);
 			dispatch(deleteCompanySuccess(data));
 		} catch (error) {
 			dispatch(deleteCompanyFailure(error));
@@ -53,40 +58,40 @@ function Company () {
 	return (
 		<section className='gridfullcol grid11row flex flex-col gap-5'>
 			<div
-				className=' h-full flex justify-center gap-5 relative shadow-md rounded-md p-10'
+				className=' h-full flex justify-center gap-5 overflow-auto relative shadow-md rounded-md'
 				onMouseEnter={() => setShowBtns(true)}
 				onMouseLeave={() => setShowBtns(false)}
 			>
 
-				<div className=' flex flex-col gap-5 p-5 items-center shadow-md rounded-md'>
+				<div className=' flex flex-col gap-5 p-5 ml-5 items-center shadow-md rounded-md'>
 					<p className='m-0 pb-1 whitespace-nowrap'>Company Profile</p>
 					<div className='flex flex-col items-center gap-5  md:justify-center md:gap-10 overflow-auto'>
-						<img src={state?.companyLogo} className=' w-24 h-24 rounded-full' />
+						<img src={company?.companyLogo} className=' w-24 h-24 rounded-full' />
 						<div className='flex flex-col gap-1 items-center '>
 							<p className='font-bold m-0'>
-								{state?.companyName} <span className='font-light'>({state?.companyType})</span>
+								{company?.companyName} <span className='font-light'>({company?.companyType})</span>
 							</p>
 							<address className='font-light text-center'>
-								<p>{state?.website}</p>
-								<p>{state?.telNumber?.line + ",  " + state?.telNumber?.mobile}</p>
+								<p>{company?.website}</p>
+								<p>{company?.telNumber?.line + ",  " + company?.telNumber?.mobile}</p>
 								<p>
-									{`${state?.location?.city} ${state?.location?.state ? ", " + state?.location?.state : ""}  ${", " + state?.location?.country} ${state?.location?.city ? ", " + state?.location?.zipCode : ""}`}
+									{`${company?.location?.city} ${company?.location?.company ? ", " + company?.location?.company : ""}  ${", " + company?.location?.country} ${company?.location?.city ? ", " + company?.location?.zipCode : ""}`}
 								</p>
 							</address>
-							<a href={state?.description} target="_blank">Read company description download pdf</a>
+							<a href={company?.description} target="_blank">Read company description download pdf</a>
 						</div>
 					</div>
 				</div>
 
 				<>
-				{
-					showBtns &&
+					{
+						showBtns &&
 						<div className='grid gap-1 absolute right-7 bottom-12'>
 							<IconButton Icon={<Details color='secondary' fontSize='large' />} onClick={handleSeeJobs} />
 							<IconButton Icon={<Edit color='primary' fontSize='large' />} onClick={handleEdit} />
-								<IconButton Icon={<DeleteForever color='error' fontSize='large' />} onClick={handleDeleteCompany} />
-					</div>
-				}
+							<IconButton Icon={<DeleteForever color='error' fontSize='large' />} onClick={handleDeleteCompany} />
+						</div>
+					}
 				</>
 
 				<div className=' w-3/5 h-full pt-0  shadow-md p-5 rounded-md flex flex-col justify-center'>
