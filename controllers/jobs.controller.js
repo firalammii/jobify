@@ -4,6 +4,7 @@ const { JobModel } = require('../models/job.model');
 const { addJobs } = require('./company.controller');
 
 const getAllJobs = async (req, res) => {
+	console.log(req.cookies)
 	try {
 		const page = parseInt(req.query.page) || 1;
 		const limit = parseInt(req.query.limit) || 10;
@@ -56,7 +57,7 @@ const getAllJobs = async (req, res) => {
 			searchQuery['experience.maxYears'] = { $lte: maxYears };
 		}
 
-		const jobs = await JobModel.find(searchQuery).populate("company")
+		const jobs = await JobModel.find(searchQuery)
 			.sort({ createdAt: createdAt })
 			.skip((page - 1) * limit)
 			.limit(limit);
@@ -81,7 +82,7 @@ const getAllJobs = async (req, res) => {
 const getJob = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const job = await JobModel.findById(id);
+		const job = await JobModel.findById(id).populate('company');
 		return res.status(200).json(job);
 	} catch (error) {
 		console.error(error);
@@ -102,6 +103,7 @@ const createJob = async (req, res) => {
 			applyURL,
 			experience,
 			postingDate,
+			description,
 			applicationDeadline,
 		} = req.body;
 
@@ -109,7 +111,7 @@ const createJob = async (req, res) => {
 		const job = await JobModel.create({
 			title,
 			jobCategory,
-			company: company.id,
+			company: company._id,
 			salary,
 			location,
 			jobType,
@@ -117,6 +119,7 @@ const createJob = async (req, res) => {
 			applyURL,
 			experience,
 			postingDate,
+			description,
 			applicationDeadline,
 		});
 		const addingSucceded = await addJobs(job);
@@ -137,7 +140,8 @@ const updateJob = async (req, res) => {
 			return res.status(400).json({ message: "jobs does not found" });
 
 		Object.assign(job, jobObj);
-		const updated = await job.save();
+		job.company = jobObj.company._id;
+		const updated = await (await job.save()).populate('company');
 		return res.status(201).json(updated);
 	} catch (error) {
 		console.error(error);

@@ -5,11 +5,9 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const path = require('path');
 
-
 const { logger } = require('./middlewares/logger');
 const { authenticate } = require('./middlewares/authenticate');
 const authRoute = require('./routes/auth');
-const refreshRoute = require('./routes/refresh');
 // const geminiAIRoute = require('./routes/api/geminiAI');
 const usersRoute = require('./routes/api/user.route');
 const jobsRoute = require('./routes/api/job.route');
@@ -17,15 +15,16 @@ const companiesRoute = require('./routes/api/company.route');
 const rootRoute = require('./routes/root');
 const connectDB = require('./config/db_conn');
 const { authorize } = require('./middlewares/authorize');
-const { ROLES_LIST } = require('./config/roles');
+const { ROLES } = require('./config/roles');
 const { createJobDescAI } = require('./controllers/geminiAI');
+const corsOptions = require('./config/corsOptions');
 
 const app = express();
 dotenv.config();
 
 connectDB();
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,18 +34,15 @@ app.use(logger);
 
 app.get('/api', rootRoute);
 app.use('/api/auth', authRoute);
-app.use('/api/refresh', refreshRoute);
 
-// app.use(authenticate);
-// app.use(authorize(ROLES_LIST.ADMIN));
+app.use(authenticate);
+app.use(authorize(ROLES.admin));
 app.post('/api/gemini', createJobDescAI);
 // app.use('/api/gemini', geminiAIRoute);
 app.use('/api/jobs', jobsRoute);
 app.use('/api/companies', companiesRoute);
-// app.use(authorize(ROLES_LIST.SUPER));
+app.use(authorize(ROLES.super));
 app.use('/api/users', usersRoute);
-
-
 
 app.all('*', (req, res) => {
 	res.status(404);

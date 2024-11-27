@@ -1,5 +1,5 @@
 const express = require('express');
-const { upload } = require('../../middlewares/fileUpload');
+// const { upload } = require('../../middlewares/fileUpload');
 const { ROLES } = require('../../config/roles');
 const { authorize } = require('../../middlewares/authorize');
 const { getAllCompanies, createCompany, updateCompany, deleteCompany, getCompany } = require('../../controllers/company.controller');

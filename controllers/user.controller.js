@@ -57,7 +57,7 @@ const getUser = async (req, res) => {
 
 const createUser = async (req, res) => {
 	try {
-		const user = _.pick(req.body, ["firstName", "lastName", "email", "password", "roles"]);
+		const user = _.pick(req.body.user, ["firstName", "lastName", "email", "password", "roles"]);
 		const { error } = validateUser(user);
 		if (error)
 			return res.status(409).json(error);

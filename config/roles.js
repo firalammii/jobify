@@ -4,13 +4,6 @@ const ROLES = {
 	user: "USER",
 };
 
-const tokenTimeouts = {
-	accessTokenExpiry: "200s",
-	refreshTokenTokenExpiry: "2000s"
-
-}
-
 module.exports = {
 	ROLES,
-	tokenTimeouts,
 };
