@@ -43,11 +43,9 @@ const handleLogin = async (req, res, next) => {
 			_id: foundUser._id,
 		};
 		res.setHeader("Set-Cookie", `${cookieName}=${refreshToken}; HttpOnly`);
-		const cookie = `${cookieName}=${refreshToken}; Path=/;`;
+		// const cookie = `${cookieName}=${refreshToken}; Path=/;`;
 		// res.setHeader("Set-Cookie", cookie);
 		// res.cookie(cookieName, refreshToken, cookieOptions);
-		console.log(accessToken);
-		console.log(res);
 		return res.status(200).json({ ...returnObj });
 	} catch (error) {
 		console.error(error);
@@ -58,8 +56,6 @@ const handleLogin = async (req, res, next) => {
 const handleLogout = async (req, res) => {
 	try {
 		const refreshToken = req.cookies[cookieName];
-		console.log(req.cookies);
-		console.log(refreshToken);
 		if (!refreshToken)
 			return res.sendStatus(204);
 		const foundUser = await UserModel.findOne({ refreshToken }).exec();
@@ -69,7 +65,7 @@ const handleLogout = async (req, res) => {
 		}
 		foundUser.refreshToken = "";
 		await foundUser.save();
-		res.clearCookie(cookieName, cookieOptions);
+		res.clearCookie(cookieName, { ...cookieOptions, maxAge: null });
 		return res.sendStatus(204);
 
 	} catch (error) {
@@ -83,8 +79,6 @@ const handleRefresh = async (req, res) => {
 	try {
 		// const refreshToken = req.cookies[cookieName];
 		const refreshToken = req.cookies && req.cookies[cookieName];
-		console.log(req.cookies);
-		console.log(refreshToken);
 		if (!refreshToken)
 			return res.sendStatus(401);
 
