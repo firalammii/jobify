@@ -1,15 +1,11 @@
-const _ = require('lodash');
-
 const { JobModel } = require('../models/job.model');
 const { addJobs } = require('./company.controller');
 
 const getAllJobs = async (req, res) => {
-	console.log(req.cookies)
 	try {
 		const page = parseInt(req.query.page) || 1;
 		const limit = parseInt(req.query.limit) || 10;
-		const createdAt = parseInt(req.query.createdAt) || -1;
-
+		const sortBy = req.query.orderBy?.split("_") || ["date", "desc"];
 		const filters = {
 			company: req.query.company,
 			location: req.query.location,
@@ -21,6 +17,7 @@ const getAllJobs = async (req, res) => {
 			maxSalary: req.query.maxSalary,
 			minYears: req.query.minYears,
 			maxYears: req.query.maxYears,
+			postingDate: req.query.postingDate,
 		};
 
 		const { company, location, jobCategory, title, jobType, remoteOption, minSalary, maxSalary, minYears, maxYears, } = filters;
@@ -33,7 +30,7 @@ const getAllJobs = async (req, res) => {
 
 		if (title) searchQuery.title = { $regex: title, $options: 'i' };
 
-		if (jobCategory) searchQuery.jobCategory = { $regex: title, $options: 'i' };
+		if (jobCategory) searchQuery.jobCategory = { $regex: jobCategory, $options: 'i' };
 
 		if (jobType) searchQuery.jobType = jobType;
 
@@ -57,8 +54,13 @@ const getAllJobs = async (req, res) => {
 			searchQuery['experience.maxYears'] = { $lte: maxYears };
 		}
 
+		if (sortBy[0] !== "title")
+			sortBy[0] = "createdAt";
+
+		sortBy[1] = sortBy[1] === "desc" ? -1 : 1;
+
 		const jobs = await JobModel.find(searchQuery)
-			.sort({ createdAt: createdAt })
+			.sort({ [sortBy[0]]: sortBy[1] })
 			.skip((page - 1) * limit)
 			.limit(limit);
 
@@ -122,8 +124,8 @@ const createJob = async (req, res) => {
 			description,
 			applicationDeadline,
 		});
-		const addingSucceded = await addJobs(job);
-		if (!addingSucceded) throw ({ error, company_message: "Company does not found" });
+		const addingSucceeded = await addJobs(job);
+		if (!addingSucceeded) throw ({ error, company_message: "Company does not found" });
 		return res.status(201).json(job);
 	} catch (error) {
 		console.error(error);
@@ -152,8 +154,8 @@ const updateJob = async (req, res) => {
 const deleteJob = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const deletedjob = await JobModel.findByIdAndDelete(id);
-		return res.status(200).json(deletedjob);
+		const deletedJob = await JobModel.findByIdAndDelete(id);
+		return res.status(200).json(deletedJob);
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ message: error });
