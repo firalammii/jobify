@@ -24,7 +24,7 @@ const userSlice = createSlice({
 		setTargetUser: (state, action) => {
 			state.targetUser = action.payload;
 		},
-
+		clearUsers: (state) => state = initialState 
 	},
 	extraReducers: (builder) => {
 		builder
@@ -108,7 +108,7 @@ const userSlice = createSlice({
 
 export const {
 
-	setTargetUser,
+	setTargetUser, clearUsers,
 
 } = userSlice.actions;
 export const usersSelector = (state => state.users);

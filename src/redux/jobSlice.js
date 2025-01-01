@@ -32,7 +32,8 @@ export const jobSlice = createSlice({
 		},
 		setSearchQuery: (state, { payload }) => {
 			state.searchQuery = payload;
-		}
+		},
+		clearJobs: (state) => state = initialState 
 	},
 	extraReducers: (builder) =>
 		builder
@@ -135,6 +136,7 @@ export const {
 	setTargetJob,
 	failedDueError,
 	setSearchQuery,
+	clearJobs,
 } = jobSlice.actions;
 export const jobsSelector = (state => state.jobs);
 export default jobSlice.reducer;

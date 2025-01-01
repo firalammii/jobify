@@ -26,6 +26,7 @@ const jobSlice = createSlice({
 		clearModal: () => (state) => {
 			state.modalCompany = null;
 		},
+		clearCompanies: (state) => state = initialState 
 
 	},
 	extraReducers: (builder) => {
@@ -58,7 +59,8 @@ const jobSlice = createSlice({
 
 export const {
 	clearModal,
-	setModal
+	setModal,
+	clearCompanies,
 } = jobSlice.actions;
 
 export const companiesSelector = (state) => state.companies;

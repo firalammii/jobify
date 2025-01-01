@@ -6,6 +6,9 @@ import { LINK_TO } from '../data/appData';
 import { Avatar, Button, Stack } from '@mui/material';
 import { signOut } from '../@api/api/auth_api';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import { clearJobs } from '../redux/jobSlice';
+import { clearCompany } from '../redux/companySlice';
+import { clearUsers } from '../redux/userSlice';
 
 
 const styles = {
@@ -47,6 +50,9 @@ const useNavbar = () => {
 
 	const handleLogout = (e) => {
 		dispatch(signOut());
+		dispatch(clearJobs());
+		dispatch(clearCompanies());
+		dispatch(clearUsers());
 		closeAnchor();
 	};
 

@@ -90,7 +90,7 @@ const authSlice = createSlice({
 			.addCase(signOut.fulfilled, (state, { payload }) => {
 				if (payload) {
 					state.currentUser = null;
-					state.status = API_STATUS.succeeded;
+					state.status = API_STATUS.idle;
 					state.error = null;
 				}
 			})
