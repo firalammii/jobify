@@ -9,10 +9,10 @@ const { ROLES } = require('../config/roles');
 const alreadyAdminMsg = "User is Already an Admin User";
 const alreadySuperMsg = "User is Already A Super_Admin User";
 const alreadyDeniedMsg = "User has No Any Access";
-const roleSuccessMsg = "Making Super_Admin Operation is successfull";
-const adminSuccessMsg = "Making Super_Admin Operation is successfull";
-const denialSuccessMsg = "Removing All User Roles Operation is successfull";
-const removalSuccessMsg = "Deleting User Operation is successfull";
+const roleSuccessMsg = "Making Super_Admin Operation is successful";
+const adminSuccessMsg = "Making Super_Admin Operation is successful";
+const denialSuccessMsg = "Removing All User Roles Operation is successful";
+const removalSuccessMsg = "Deleting User Operation is successful";
 
 
 const getAllUsers = async (req, res) => {

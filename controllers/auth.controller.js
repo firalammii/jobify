@@ -5,8 +5,8 @@ const UserModel = require("../models/user.model");
 const { cookieOptions, cookieName } = require('../config/cookieOptions');
 
 const tokenTimeouts = {
-	accessTokenExpiry: "30s",
-	refreshTokenExpiry: "2000s"
+	accessTokenExpiry: "900s",
+	refreshTokenExpiry: "1800s"
 }
 
 const handleLogin = async (req, res, next) => {
@@ -51,26 +51,6 @@ const handleLogin = async (req, res, next) => {
 	}
 };
 
-const handleLogout = async (req, res) => {
-	try {
-		const refreshToken = req.cookies[cookieName];
-		if (!refreshToken)
-			return res.sendStatus(204);
-		const foundUser = await UserModel.findOne({ refreshToken }).exec();
-		if (!foundUser) {
-			res.clearCookie(cookieName, cookieOptions);
-			return res.sendStatus(204);
-		}
-		foundUser.refreshToken = "";
-		await foundUser.save();
-		res.clearCookie(cookieName, { ...cookieOptions, maxAge: null });
-		return res.sendStatus(204);
-	} catch (error) {
-		console.error(error);
-		next(error);
-	}
-};
-
 const handleRefresh = async (req, res, next) => {
 	try {
 		const refreshToken = req.cookies[cookieName];
@@ -79,17 +59,17 @@ const handleRefresh = async (req, res, next) => {
 
 		const foundUser = await UserModel.findOne({ refreshToken }).exec();
 		if (!foundUser)
-			return res.status(403).json({ message: "No User with the Token is found" });
+			return res.status(401).json({ message: "No User with the Token is found" });
 
 		verify(
 			refreshToken,
 			process.env.REFRESH_TOKEN_SECRET,
 			(err, decoded) => {
 				if (err) {
-					return res.status(403).json({ message: err.message });
+					return res.status(401).json({ message: err.message });
 				}
 				if (decoded.email !== foundUser.email) {
-					return res.status(403).json({ message: "Email Does not match" });
+					return res.status(401).json({ message: "Email Does not match" });
 				}
 
 				const accessToken = generateToken(
@@ -107,6 +87,25 @@ const handleRefresh = async (req, res, next) => {
 	}
 };
 
+const handleLogout = async (req, res) => {
+	try {
+		const refreshToken = req.cookies[cookieName];
+		if (!refreshToken)
+			return res.sendStatus(204);
+		const foundUser = await UserModel.findOne({ refreshToken }).exec();
+		if (!foundUser) {
+			res.clearCookie(cookieName, { ...cookieOptions, maxAge: null });
+			return res.sendStatus(204);
+		}
+		foundUser.refreshToken = "";
+		await foundUser.save();
+		res.clearCookie(cookieName, { ...cookieOptions, maxAge: null });
+		return res.sendStatus(204);
+	} catch (error) {
+		console.error(error);
+		next(error);
+	}
+};
 
 const generateToken = (obj, secret, duration) => {
 	return sign(

@@ -9,8 +9,8 @@ const getAllCompanies = async (req, res) => {
 		const companies = await CompanyModel.find()
 			.sort({ createdAt: -1 })
 			.skip((page - 1) * limit)
-			.limit(limit);
-		// .populate("jobs");
+			.limit(limit)
+			.populate("jobs");
 
 		const totalNum = await CompanyModel.countDocuments();
 
