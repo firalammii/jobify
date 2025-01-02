@@ -12,6 +12,7 @@
     "axios": "^1.7.9",
     "cra-template": "1.2.0",
     "dayjs": "^1.11.13",
+    "firebase": "^11.1.0",
     "formik": "^2.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -21,7 +22,6 @@
     "redux-persist": "^6.0.0",
     "yup": "^1.6.1"
   },
-  
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -47,6 +47,6 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object":"7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "7.21.11"
   }
 }

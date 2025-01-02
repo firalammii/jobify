@@ -73,4 +73,4 @@ function JobDetails ({ job }) {
 	);
 }
 
-export default JobDetails;;;;
+export default JobDetails;
