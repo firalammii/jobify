@@ -20,7 +20,7 @@ const CompanyPage = () => {
 	useEffect(() => {
 		let isMounted = true;
 		if (isMounted && status === API_STATUS.idle) {
-			dispatch(fetchCompanies());
+			dispatch(fetchCompanies(`/?page=${1}&limit=${rowsPerPage}`));
 			console.log("companies call");
 		}
 		return () => {

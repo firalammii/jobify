@@ -50,9 +50,9 @@ const useNavbar = () => {
 
 	const handleLogout = (e) => {
 		dispatch(signOut());
-		dispatch(clearJobs());
-		dispatch(clearCompanies());
-		dispatch(clearUsers());
+		// dispatch(clearJobs());
+		// dispatch(clearCompanies());
+		// dispatch(clearUsers());
 		closeAnchor();
 	};
 
