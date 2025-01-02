@@ -9,7 +9,8 @@ export const signIn = createAsyncThunk('auth/login', async (loginData, thunkAPI)
 		return data;
 	} catch (error) {
 		console.error(error);
-		return thunkAPI.rejectWithValue(error.message);
+		const errPayload = error.response?.data?.message || error.message;
+		return thunkAPI.rejectWithValue(errPayload);
 	}
 });
 

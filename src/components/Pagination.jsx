@@ -7,9 +7,9 @@ function Pagination ({ rowsOptions, onRowsPerPageChange, currPage, totalPages, r
 
 	const rowsOption = rowsOptions?.map(row => (<MenuItem sx={{ height: 25 }} key={row} value={row}>{row}</MenuItem>));
 	return (
-		<Paper sx={{ p: 1, m: '5px', position: 'absolute', bottom: 0, left: 0 }}>
+		<Paper sx={{ p: 1, width: '100%', m: '5px', position: 'absolute', bottom: 0, left: 0 }}>
 			<Stack spacing={2} pt={1} direction='row' justifyContent='space-between' alignItems='center' overflow='auto'>
-				<FormControl sx={{ minWidth: 120 }}>
+				<FormControl sx={{ minWidth: 90, maxWidth: 200, width: '100%	' }}>
 					<InputLabel id='rows-per-page-label'>Rows Per Page</InputLabel>
 					<Select
 						labelId='rows-per-page-label'

@@ -5,6 +5,8 @@ import { store } from "../redux/store";
 
 // const BASE_URL = 'http://localhost:3500';
 // const BASE_URL = 'https://jobify-5f6w.onrender.com';
+const BASE_URL = 'https://jobify-api-hamn.onrender.com';
+
 
 const axiosDef = axios.create({
     baseURL: BASE_URL,
